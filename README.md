@@ -1,2 +1,4 @@
 # xiaoxing
 raid-helper
+这是仙境传说（ro）公会：世上只有布丁好  的副本小帮手
+设计，制作By 木木
