@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>星座塔组队助手</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0e17;--bg2:#111520;--bg3:#161c2e;--bg4:#1c2340;
+  --border:#1e2a45;--border2:#253050;
+  --gold:#f0a500;--gold2:#ffd166;
+  --text:#c8d4f0;--text2:#8896b3;--text3:#5a6a8a;
+  --green:#22c55e;--green2:#16a34a;
+  --yellow:#eab308;--yellow2:#a16207;
+  --red:#ef4444;--red2:#991b1b;
+  --blue:#3b82f6;
+}
+body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ─── TOP BAR ─── */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;gap:16px;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:10px;margin-right:8px}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#f0a500,#ff6b35);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text{font-size:17px;font-weight:700;color:#f0f6ff;letter-spacing:.5px;white-space:nowrap}
+.topbar-sep{width:1px;height:28px;background:var(--border);flex-shrink:0}
+.topbar-field{display:flex;align-items:center;gap:6px}
+.topbar-field label{font-size:11px;color:var(--text2);white-space:nowrap}
+.topbar-field input,.topbar-field select{background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;outline:none}
+.topbar-field input[type=date]{width:130px}
+.topbar-field select{padding-right:24px;cursor:pointer}
+.topbar-field input:focus,.topbar-field select:focus{border-color:var(--gold)}
+.topbar-spacer{flex:1}
+.btn{border:none;border-radius:7px;padding:7px 14px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:600;white-space:nowrap;transition:opacity .15s,transform .1s}
+.btn:hover{opacity:.85}.btn:active{transform:scale(.97)}
+.btn-ghost{background:var(--bg3);color:var(--text);border:1px solid var(--border2)}
+.btn-ghost:hover{background:var(--bg4)}
+.btn-danger{background:#2a1515;color:#f87171;border:1px solid #5a1e1e}
+.btn-primary{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;box-shadow:0 2px 12px #4f46ed44}
+
+/* ─── MAIN LAYOUT ─── */
+.main{flex:1;display:flex;gap:0;overflow:hidden}
+
+/* ─── LEFT PANEL ─── */
+.panel-left{width:420px;min-width:320px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.panel-title{padding:14px 16px 10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.panel-title .icon{color:var(--gold);font-size:14px}
+.panel-title h2{font-size:14px;font-weight:700;color:#e8f0ff}
+.panel-title .badge{background:var(--bg4);border:1px solid var(--border2);border-radius:12px;padding:1px 8px;font-size:11px;color:var(--text2);margin-left:auto}
+
+.filters{padding:10px 12px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--border)}
+.filter-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chk-label{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;user-select:none}
+.chk-label input{accent-color:var(--gold)}
+.btn-filter-all{background:var(--bg3);color:var(--text2);border:1px solid var(--border2);border-radius:5px;padding:3px 10px;font-size:12px;cursor:pointer;font-family:inherit;transition:background .15s,color .15s,border-color .15s;line-height:1.6}
+.btn-filter-all.active{background:#1a1400;color:var(--gold);border-color:var(--gold)}
+.search-wrap{flex:1;position:relative;min-width:140px}
+.search-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 10px 6px 30px;font-size:12px;color:var(--text);font-family:inherit;outline:none}
+.search-wrap input:focus{border-color:var(--gold)}
+.search-wrap .si{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px}
+.job-filter-wrap select{background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;font-family:inherit;outline:none;cursor:pointer}
+.job-filter-wrap select:focus{border-color:var(--gold)}
+
+.pool-scroll{flex:1;overflow-y:auto;padding:8px 10px 16px}
+.pool-scroll::-webkit-scrollbar{width:7px}
+.pool-scroll::-webkit-scrollbar-track{background:var(--bg3);border-radius:4px;margin:4px 0}
+.pool-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.pool-scroll::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+
+.job-group{margin-bottom:8px}
+.job-group-header{display:flex;align-items:center;gap:7px;padding:6px 4px 5px;cursor:pointer;user-select:none}
+.job-group-header:hover .jg-name{color:#fff}
+.jg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.jg-name{font-size:12px;font-weight:700;color:var(--text2)}
+.jg-count{font-size:11px;color:var(--text3);margin-left:2px}
+.jg-arrow{margin-left:auto;color:var(--text3);font-size:10px;transition:transform .2s}
+.jg-arrow.open{transform:rotate(180deg)}
+.job-cards{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 2px 4px}
+
+.char-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:9px;cursor:pointer;transition:border-color .15s,background .15s;position:relative}
+.char-card:hover{border-color:var(--gold);background:var(--bg4)}
+.char-card.in-roster{opacity:.45;cursor:not-allowed;pointer-events:none}
+.char-card.cooling{opacity:.6;cursor:not-allowed;pointer-events:none}
+.char-card .avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;border:2px solid transparent}
+.char-card .info{flex:1;min-width:0;padding-right:54px}
+.char-card .cid{font-size:12px;font-weight:600;color:#e8f0ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.char-card .cmeta{font-size:10px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.char-card .cdate{font-size:10px;color:var(--text3);margin-top:1px}
+.stat-badge{position:absolute;top:7px;right:8px;display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700}
+.sb-ok{background:#0d2d1a;color:#22c55e;border:1px solid #15532e}
+.sb-cd{background:#2d2200;color:#eab308;border:1px solid #5a4200}
+.sb-abs{background:#2d1515;color:#f87171;border:1px solid #5a1e1e}
+
+/* ─── RIGHT PANEL ─── */
+.panel-right{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.roster-top{padding:14px 20px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.roster-top h2{font-size:14px;font-weight:700;color:#e8f0ff}
+.roster-count{background:var(--bg4);border:1px solid var(--border2);border-radius:12px;padding:2px 10px;font-size:12px;color:var(--text2)}
+.roster-count.full{background:#0d2d1a;border-color:#15532e;color:var(--green)}
+.roster-done-badge{margin-left:4px;display:none;align-items:center;gap:4px;color:var(--green);font-size:12px;font-weight:700}
+.roster-done-badge.show{display:flex}
+
+.roster-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 16px;overflow-y:auto;align-content:start}
+.roster-grid::-webkit-scrollbar{width:5px}
+.roster-grid::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+.slot{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 12px;display:flex;align-items:center;gap:10px;min-height:58px;transition:border-color .15s}
+.slot.filled{border-color:var(--border2);background:var(--bg3)}
+.slot.empty{border-style:dashed;opacity:.7}
+.slot.empty:hover{border-color:var(--gold);opacity:1}
+.slot-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;flex-shrink:0}
+.slot-info{flex:1;min-width:0}
+.slot-job{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.slot-char{font-size:13px;font-weight:600;color:#e8f0ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot-oper{font-size:11px;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot-placeholder{font-size:12px;color:var(--text3);font-style:italic}
+.slot-remove{width:22px;height:22px;border-radius:50%;background:rgba(239,68,68,.15);border:1px solid #5a1e1e;color:#f87171;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:background .15s;line-height:1}
+.slot-remove:hover{background:rgba(239,68,68,.35)}
+
+/* ─── BOTTOM ─── */
+.roster-actions{padding:12px 16px;border-top:1px solid var(--border);background:var(--bg2);display:flex;gap:8px;flex-wrap:wrap}
+.roster-actions .btn{flex:1}
+.btn-confirm{background:linear-gradient(135deg,#d97706,#b45309);color:#fff;box-shadow:0 2px 10px #d9770633}
+.btn-wechat{background:linear-gradient(135deg,#1e3a5f,#1e2a4f);color:#79c0ff;border:1px solid #1e3a6e}
+.btn-copy{background:var(--bg3);color:var(--text2);border:1px solid var(--border2)}
+.btn-nav{background:var(--bg3);color:var(--text2);border:1px solid var(--border2);border-radius:6px;padding:5px 9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;line-height:1;transition:opacity .15s}
+.btn-nav:hover:not(:disabled){opacity:.7;color:var(--text)}
+.btn-nav:disabled{opacity:.25;cursor:not-allowed}
+
+.bottom-row{display:flex;gap:0;border-top:1px solid var(--border);min-height:160px;max-height:220px;flex-shrink:0}
+.wechat-preview{flex:1;background:var(--bg2);border-right:1px solid var(--border);padding:12px 16px;overflow-y:auto}
+.wechat-preview::-webkit-scrollbar{width:4px}
+.wechat-preview::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.preview-title{font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:600}
+.preview-text{font-size:12px;color:var(--text);line-height:1.8;white-space:pre-wrap;font-family:'Consolas',monospace}
+.stats-panel{width:180px;background:var(--bg2);padding:12px 16px;flex-shrink:0}
+.stats-title{font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:600}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.stat-row span:first-child{font-size:12px;color:var(--text2)}
+.stat-val{font-size:14px;font-weight:700}
+.sv-ok{color:var(--green)}.sv-cd{color:var(--yellow)}.sv-dis{color:var(--red)}.sv-tot{color:#79c0ff}
+.stat-divider{height:1px;background:var(--border);margin:4px 0}
+
+/* ─── RESIZER ─── */
+.resizer{width:5px;background:var(--border);cursor:col-resize;flex-shrink:0;transition:background .15s}
+.resizer:hover,.resizer.dragging{background:var(--gold)}
+
+/* ─── MISC ─── */
+.pool-empty{text-align:center;padding:32px 16px;color:var(--text3);font-size:13px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c2340;border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:10px 20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+
+@media(max-width:900px){
+  .panel-left{width:100%;min-width:unset;height:45vh;border-right:none;border-bottom:1px solid var(--border)}
+  .main{flex-direction:column;height:auto;overflow:auto}
+  .panel-right{min-height:55vh}
+  .roster-grid{grid-template-columns:1fr}
+}
+
+/* ─── VIEWS ─── */
+.view{display:none}
+#viewHome.active{display:block;min-height:100vh}
+#viewTeam.active{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* ─── HOME PAGE ─── */
+.hero{background:linear-gradient(160deg,#0f1628 0%,#1a1030 55%,#0b0e17 100%);border-bottom:1px solid var(--border);padding:52px 40px 44px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,#f0a50012 0%,transparent 70%);pointer-events:none}
+.guild-emblem{width:72px;height:72px;background:linear-gradient(135deg,#f0a500,#ff6b35);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:38px;margin:0 auto 18px;box-shadow:0 4px 28px #f0a50040;position:relative;z-index:1}
+.guild-name{font-size:38px;font-weight:900;color:#f0f6ff;letter-spacing:3px;position:relative;z-index:1}
+.guild-name span{color:var(--gold)}
+.guild-welcome{font-size:14px;color:var(--text2);margin-top:8px;letter-spacing:.5px;position:relative;z-index:1}
+.guild-badges{display:flex;justify-content:center;gap:8px;margin-top:14px;position:relative;z-index:1}
+.g-badge{background:var(--bg4);border:1px solid var(--border2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--text2)}
+.g-badge.gold{background:#1a1400;border-color:#5a4200;color:var(--gold)}
+.home-section{padding:32px 40px 0}.home-section:last-child{padding-bottom:40px}
+.home-section-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.home-section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.h-entries{display:flex;flex-wrap:wrap;gap:14px}
+.h-entry{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:22px 26px;cursor:pointer;transition:border-color .2s,background .2s,transform .15s,box-shadow .2s;display:flex;flex-direction:column;gap:8px;min-width:200px;max-width:260px}
+.h-entry:hover{border-color:var(--gold);background:var(--bg3);transform:translateY(-3px);box-shadow:0 8px 28px #f0a50018}
+.h-entry-icon{font-size:32px;line-height:1}
+.h-entry-title{font-size:17px;font-weight:700;color:#e8f0ff}
+.h-entry-desc{font-size:12px;color:var(--text2);line-height:1.5}
+.h-entry-enter{display:inline-block;margin-top:4px;padding:2px 9px;border-radius:4px;font-size:11px;font-weight:700;background:#1a1400;color:var(--gold);border:1px solid #5a4200;align-self:flex-start}
+.hist-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hist-bar h2{font-size:14px;font-weight:700;color:#e8f0ff}
+.hist-count{background:var(--bg4);border:1px solid var(--border2);border-radius:12px;padding:1px 9px;font-size:11px;color:var(--text2)}
+.btn-sm{background:var(--bg3);color:var(--text2);border:1px solid var(--border2);border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:inherit;transition:background .15s,color .15s}
+.btn-sm:hover{background:var(--bg4);color:var(--text)}
+.btn-sm.active{background:#0d1e35;color:#79c0ff;border-color:#1e3a6e}
+.btn-sm.danger:hover{background:#3d1a1a;color:var(--red)}
+.hist-list{display:none;flex-direction:column;gap:8px}
+.hist-list.show{display:flex}
+.hist-entry-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.hist-entry-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.hist-date{font-size:12px;color:var(--text2)}
+.hist-car{background:var(--bg4);border:1px solid var(--border2);border-radius:5px;padding:1px 8px;font-size:11px;color:var(--gold);font-weight:700}
+.hist-time{font-size:11px;color:var(--text3);margin-left:auto}
+.hist-slots{display:flex;flex-wrap:wrap;gap:5px}
+.hist-slot{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:11px;color:var(--text);white-space:nowrap}
+.hist-slot-lbl{color:var(--text3)}
+.hist-empty{text-align:center;padding:32px 20px;color:var(--text3);font-size:13px;line-height:2.2}
+
+/* ─── CD RULE EDITABLE ─── */
+.cd-edit-wrap{display:flex;align-items:center;gap:4px}
+.cd-val{background:var(--bg3);color:var(--gold);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-size:13px;font-weight:700;cursor:pointer;min-width:34px;text-align:center;transition:border-color .15s;line-height:1}
+.cd-val:hover{border-color:var(--gold)}
+.cd-input{background:var(--bg3);color:var(--text);border:1px solid var(--gold);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;outline:none;width:54px;display:none}
+.cd-unit{font-size:12px;color:var(--text2);white-space:nowrap}
+
+/* ─── RESET BTN (pool panel) ─── */
+.btn-reset{background:transparent;border:1px solid var(--border2);border-radius:5px;padding:2px 8px;font-size:11px;color:var(--text3);cursor:pointer;font-family:inherit;transition:color .15s,border-color .15s;line-height:1.6}
+.btn-reset:hover{color:var(--gold);border-color:var(--gold)}
+.btn-reset.has-cd{color:var(--yellow);border-color:var(--yellow2)}
+</style>
+</head>
+<body>
+
+<!-- ══ HOME VIEW ══ -->
+<div id="viewHome" class="view active">
+  <div class="hero">
+    <div class="guild-emblem">🏰</div>
+    <div class="guild-name">布丁<span>工会</span></div>
+    <div class="guild-welcome">欢迎来到布丁工会！</div>
+    <div class="guild-badges">
+      <span class="g-badge gold">⭐ 活跃工会</span>
+      <span class="g-badge">副本管理系统</span>
+    </div>
+  </div>
+  <div class="home-section">
+    <div class="home-section-label">副本团队</div>
+    <div class="h-entries">
+      <div class="h-entry" onclick="showView('team')">
+        <div class="h-entry-icon">⭐</div>
+        <div class="h-entry-title">星座团</div>
+        <div class="h-entry-desc">星座塔副本 · 11 职位组队助手<br>人物池 · 冷却管理 · 微信群文本</div>
+        <span class="h-entry-enter">进入 →</span>
+      </div>
+    </div>
+  </div>
+  <div class="home-section">
+    <div class="hist-bar">
+      <h2>📋 历史记录</h2>
+      <span class="hist-count" id="histCount">0 条</span>
+      <button class="btn-sm" id="btnToggle" onclick="toggleHist()">展开</button>
+      <button class="btn-sm danger" onclick="clearHist()">🗑 清除全部</button>
+    </div>
+    <div class="hist-list" id="homeHistList"></div>
+  </div>
+</div>
+
+<!-- ══ TEAM VIEW ══ -->
+<div id="viewTeam" class="view">
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">⭐</div>
+    <div class="logo-text">星座塔组队助手</div>
+  </div>
+  <div class="topbar-sep"></div>
+  <div class="topbar-field">
+    <label>日期</label>
+    <input type="date" id="tDate">
+  </div>
+  <div class="topbar-sep"></div>
+  <div class="topbar-field">
+    <label>车次</label>
+    <button class="btn-nav" id="btnPrev" onclick="prevCar()" disabled title="前一车">◀</button>
+    <select id="tCar">
+      <option>第 1 车</option><option>第 2 车</option><option>第 3 车</option>
+      <option>第 4 车</option><option>第 5 车</option><option>第 6 车</option>
+      <option>第 7 车</option><option>第 8 车</option><option selected>第 9 车</option>
+      <option>第 10 车</option><option>第 11 车</option><option>第 12 车</option>
+    </select>
+    <button class="btn-nav" id="btnNext" onclick="nextCar()" title="后一车">▶</button>
+  </div>
+  <div class="topbar-sep"></div>
+  <div class="topbar-field">
+    <label>冷却规则</label>
+    <div class="cd-edit-wrap">
+      <span class="cd-val" id="cdValDisp" onclick="editCD()" title="点击编辑冷却天数">3</span>
+      <input type="number" id="tCD" value="3" min="1" max="30" class="cd-input"
+             onblur="lockCD()" onkeydown="if(event.key==='Enter')this.blur()">
+      <span class="cd-unit">天</span>
+    </div>
+  </div>
+  <div class="topbar-spacer"></div>
+  <button class="btn btn-ghost" onclick="showView('home')">🏠 首页</button>
+  <button class="btn btn-ghost" onclick="refreshPool()">↺ 刷新数据</button>
+  <button class="btn btn-danger" onclick="clearRoster()">✕ 清空本车</button>
+  <button class="btn btn-primary" onclick="saveRoster()">💾 保存</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LEFT: POOL -->
+  <div class="panel-left">
+    <div class="panel-title">
+      <span class="icon">👤</span>
+      <h2>可用人物池</h2>
+      <button class="btn-reset" id="btnReset" onclick="resetAllAvailable()" title="清除所有冷却记录，重置为可用">♻ <span id="cdCount">0</span></button>
+      <span class="badge" id="poolBadge">0 人</span>
+    </div>
+    <div class="filters">
+      <div class="filter-row">
+        <button class="btn-filter-all" id="btnAll" onclick="showAll()">全部</button>
+        <label class="chk-label"><input type="checkbox" id="fAvail" checked onchange="renderPool()"> 只显示可用</label>
+        <label class="chk-label"><input type="checkbox" id="fCool" onchange="renderPool()"> 显示冷却中</label>
+      </div>
+      <div class="filter-row">
+        <div class="search-wrap">
+          <span class="si">🔍</span>
+          <input type="text" id="fSearch" placeholder="搜索人物ID / 驾驶员" oninput="renderPool()">
+        </div>
+        <div class="job-filter-wrap">
+          <select id="fJob" onchange="renderPool()">
+            <option value="">全部职业</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="pool-scroll" id="poolScroll"></div>
+  </div>
+
+  <div class="resizer" id="resizer"></div>
+
+  <!-- RIGHT PANEL -->
+  <div class="panel-right">
+    <div class="roster-top">
+      <span style="color:var(--gold);font-size:14px">⚔</span>
+      <h2>本车阵容</h2>
+      <span class="roster-count" id="rosterCount">0 / 11</span>
+      <div class="roster-done-badge" id="rosterDone">✔ 阵容已完成</div>
+    </div>
+    <div class="roster-grid" id="rosterGrid"></div>
+    <div class="roster-actions">
+      <button class="btn btn-confirm" onclick="confirmRecord()">✦ 确认记录并更新</button>
+      <button class="btn btn-wechat" onclick="genWechat()">📋 生成微信群文本</button>
+      <button class="btn btn-copy" onclick="copyText()">⎘ 复制文本</button>
+      <button class="btn btn-copy" onclick="clearWechat()">✕ 清除文本</button>
+    </div>
+    <div class="bottom-row">
+      <div class="wechat-preview">
+        <div class="preview-title">微信群文本预览</div>
+        <div class="preview-text" id="wechatText" style="color:var(--text3);font-style:italic">点击「生成微信群文本」后显示…</div>
+      </div>
+      <div class="stats-panel">
+        <div class="stats-title">当前统计</div>
+        <div class="stat-row"><span>可用人物</span><span class="stat-val sv-ok" id="stOk">0</span><span style="font-size:11px;color:var(--text3)">人</span></div>
+        <div class="stat-row"><span>冷却中</span><span class="stat-val sv-cd" id="stCd">0</span><span style="font-size:11px;color:var(--text3)">人</span></div>
+        <div class="stat-row"><span>禁用</span><span class="stat-val sv-dis" id="stDis">0</span><span style="font-size:11px;color:var(--text3)">人</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat-row"><span>总计</span><span class="stat-val sv-tot" id="stTot">0</span><span style="font-size:11px;color:var(--text3)">人</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div><!-- /viewTeam -->
+
+<script>
+// ── DATA ──
+const RAW_DATA = [{"id": "time", "account": "time", "job": "刺客", "operator": "time", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "time·刺", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time刺", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "0氪玩家", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "优质零氪玩家", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "致命影啸", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "一刀斩龙哥", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "一刀星座塔", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "1000PT", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "一刀2147M", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "*time 智", "account": "time", "job": "元素", "operator": "布丁", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "time智", "account": "time", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "智time", "account": "time", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time元素", "account": "time", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "特丽丝", "account": "蚊子", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "幕夜星火", "account": "晨音", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "希望有古老和守护", "account": "木木", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "后入更带劲", "account": "夜蓝", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "前后都有电", "account": "夜蓝", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "充电的好新人", "account": "好心人", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "芸湮", "account": "木木", "job": "大法", "operator": "木木", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "吾心神明", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "吾言神祇", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "我有猫", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "Lueur", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "鸣蝉夜夜心", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "嘉荣", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "树树是木", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "千两花火", "account": "蚊子", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "Talho Yuki", "account": "蚊子", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "EurekA", "account": "蚊子", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "Renton Thurston", "account": "蚊子", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "海之星", "account": "蚊子", "job": "皇家", "operator": "蚊子", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "魑影", "account": "蚊子", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "*time 御", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time御", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "御time", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time卫士", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "皇time", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time皇家", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "皇家time", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time皇", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "ARX-8", "account": "布丁", "job": "机匠", "operator": "夜蓝", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "自走人形", "account": "布丁", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "人形自走", "account": "布丁", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "人形对月兵器", "account": "布丁", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "人参苦短", "account": "布丁", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "铁time", "account": "time", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time铁匠", "account": "time", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "铁匠time", "account": "time", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time铁", "account": "time", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "蚊子的秘密仓库", "account": "蚊子", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "红色好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "紫色好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "黄色好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "白色好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "绿色好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "蓝色好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "RO的好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time逐影", "account": "time", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time竹影", "account": "time", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "竹影time", "account": "time", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "月夜猫~", "account": "蚊子", "job": "主教", "operator": "白露", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "anemona", "account": "蚊子", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "恭特尔", "account": "蚊子", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "埃策尔", "account": "蚊子", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "齐格 弗里德", "account": "蚊子", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "许特格", "account": "蚊子", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "兔姬丝", "account": "兔子", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "Ferris", "account": "布丁", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "黑心圣手", "account": "白露", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "事情太多", "account": "好心人", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "助力的好新人", "account": "好心人", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "祝福的好新人", "account": "好心人", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "夜蓝忆一", "account": "夜蓝", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "*time 牧", "account": "time", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "星空下的夜", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "星空下的雪", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "星空下的风", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "星空下的雨", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "呓嘻嘻", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "冷月月", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "香味果酱咖啡", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "月影子", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "白苏", "account": "木木", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "及酒", "account": "木木", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "克拉夫特", "account": "晨音", "job": "诗人", "operator": "夜蓝", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "烟嗓嚎Numb", "account": "白露", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "我谈个情你浪什么", "account": "夜蓝", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "*time 诗", "account": "time", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time宫廷", "account": "time", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time诗人", "account": "time", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "诗time", "account": "time", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "诗人time", "account": "time", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "汉宫秋月", "account": "蚊子", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "细辛属杜衡", "account": "木木", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "风吹着游子飘啊飘", "account": "晨音", "job": "契灵士", "operator": "晨音", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "秋雨落绵绵", "account": "晨音", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "晚霞缓缓", "account": "晨音", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "素心若雪", "account": "晨音", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "灵月幻花香", "account": "晨音", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "花花世界迷人眼", "account": "晨音", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "777000444", "account": "time", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "希望有星月与翅膀", "account": "木木", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "仁赭神归", "account": "好心人", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "我会变你信吗", "account": "夜蓝", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "司马承祯", "account": "蚊子", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "衔蝉奴", "account": "蚊子", "job": "猫", "operator": "蚊子", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "自走对月兵器", "account": "布丁", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "自走對月兵器", "account": "布丁", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "西森", "account": "木木", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "蓝双", "account": "木木", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "棕虎斑加白森林猫", "account": "木木", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "海豹双色布偶猫", "account": "木木", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "肉食猫科动物", "account": "木木", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "啊喵啊", "account": "time", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "泡芙小喵", "account": "白露", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}];
+
+// 11 fixed slots
+const SLOTS = [
+  {id:'s8',  job:'主教',   label:'主教（队长）', icon:'✙', prefOp:'白露'},
+  {id:'s1',  job:'刺客',   label:'刺客',        icon:'◆'},
+  {id:'s2',  job:'元素',   label:'元素',        icon:'✦'},
+  {id:'s3',  job:'机匠',   label:'机匠',        icon:'⚙'},
+  {id:'s4',  job:'大法',   label:'大法',        icon:'✧'},
+  {id:'s5',  job:'皇家',   label:'皇家',        icon:'♛'},
+  {id:'s6',  job:'诗人',   label:'诗人',        icon:'♪'},
+  {id:'s7',  job:'契灵士', label:'契灵士',      icon:'✚'},
+  {id:'s9',  job:'主教',   label:'主教（辅助）', icon:'✙', prefOp:'晨音'},
+  {id:'s10', job:'猫',     label:'猫',          icon:'⁂'},
+  {id:'s11', job:'逐影',   label:'逐影',        icon:'◈'},
+];
+
+const JOB_COLOR = {
+  '刺客':'#a855f7','元素':'#06b6d4','机匠':'#f97316','大法':'#3b82f6',
+  '皇家':'#f0a500','诗人':'#ec4899','契灵士':'#10b981','主教':'#38bdf8',
+  '主教（队长）':'#38bdf8','主教（辅助）':'#38bdf8',
+  '猫':'#fb7185','逐影':'#8b5cf6',
+};
+
+// ── DISPLAY JOB (bishop sub-role) ──
+function getDisplayJob(m) {
+  if (m.job === '主教') {
+    if (m.operator === '白露') return '主教（队长）';
+    if (m.operator === '晨音') return '主教（辅助）';
+    return '主教';
+  }
+  return m.job;
+}
+
+// ── STATE ──
+let roster = {};            // {slotId: member}
+let cdOverrides = {};       // {memberId: {cd_date, last_date}} from localStorage
+let currentCarIdx = 0;      // current car index (0-based, matches tCar selectedIndex)
+const LS_CD       = 'xzt_cd_v1';
+const LS_RST_CARS = 'xzt_roster_cars_v1'; // {c0:{...}, c1:{...}, ...}
+const LS_HIST     = 'xzt_history_v1';     // [{date,car,savedAt,roster:[{label,id,operator}]}]
+const LS_DIV      = 'xzt_divider_v1';     // left panel width in px
+
+// ── INIT ──
+function init() {
+  const today = new Date();
+  document.getElementById('tDate').value = today.toISOString().slice(0,10);
+  currentCarIdx = document.getElementById('tCar').selectedIndex;
+  loadLS();
+  buildJobFilter();
+  renderRoster();
+  renderPool();
+  updateNavBtns();
+}
+
+function loadRosterForCar(idx) {
+  let cars = {};
+  try { cars = JSON.parse(localStorage.getItem(LS_RST_CARS)||'{}'); } catch{}
+  // backward compat: migrate old single-roster
+  const old = localStorage.getItem('xzt_roster_v1');
+  if (old && !cars['c0']) { try { cars['c0'] = JSON.parse(old); } catch{} }
+  roster = cars['c' + idx] || {};
+}
+function saveRosterForCar(idx) {
+  let cars = {};
+  try { cars = JSON.parse(localStorage.getItem(LS_RST_CARS)||'{}'); } catch{}
+  cars['c' + idx] = roster;
+  localStorage.setItem(LS_RST_CARS, JSON.stringify(cars));
+}
+function loadLS() {
+  try { cdOverrides = JSON.parse(localStorage.getItem(LS_CD)||'{}'); } catch{}
+  loadRosterForCar(currentCarIdx);
+}
+function saveLS() {
+  localStorage.setItem(LS_CD, JSON.stringify(cdOverrides));
+  saveRosterForCar(currentCarIdx);
+}
+
+// ── MEMBER STATUS ──
+function getStatus(m) {
+  const ov = cdOverrides[m.id];
+  const cdStr = ov ? ov.cd_date : m.cd_date;
+  const today = document.getElementById('tDate').value;
+  if (!cdStr || cdStr < '1970') return '可用';
+  return today < cdStr ? '冷却中' : '可用';
+}
+function getLastDate(m) {
+  const ov = cdOverrides[m.id];
+  return ov ? ov.last_date : m.last_date;
+}
+function getCDDate(m) {
+  const ov = cdOverrides[m.id];
+  return ov ? ov.cd_date : m.cd_date;
+}
+
+// ── SLOT IN ROSTER ──
+function slotForMember(memberId) {
+  return Object.keys(roster).find(k => roster[k] && roster[k].id === memberId);
+}
+function addToRoster(member) {
+  let emptySlot;
+  if (member.job === '主教') {
+    // prefer the slot whose prefOp matches this member's operator
+    const pref = SLOTS.find(s => s.job === '主教' && s.prefOp === member.operator && !roster[s.id]);
+    emptySlot = pref || SLOTS.find(s => s.job === '主教' && !roster[s.id]);
+  } else {
+    emptySlot = SLOTS.find(s => s.job === member.job && !roster[s.id]);
+  }
+  if (!emptySlot) { toast('没有空余的 ' + member.job + ' 职位槽'); return; }
+  roster[emptySlot.id] = member;
+  saveLS();
+  renderRoster();
+  renderPool();
+}
+function removeFromSlot(slotId) {
+  delete roster[slotId];
+  saveLS();
+  renderRoster();
+  renderPool();
+}
+
+// ── RENDER ROSTER ──
+function renderRoster() {
+  const grid = document.getElementById('rosterGrid');
+  const filled = Object.keys(roster).filter(k => roster[k]).length;
+  document.getElementById('rosterCount').textContent = filled + ' / 11';
+  document.getElementById('rosterCount').className = 'roster-count' + (filled === 11 ? ' full' : '');
+  document.getElementById('rosterDone').className = 'roster-done-badge' + (filled === 11 ? ' show' : '');
+
+  grid.innerHTML = SLOTS.map(s => {
+    const m = roster[s.id];
+    const col = JOB_COLOR[s.job] || '#8b949e';
+    if (m) {
+      return `<div class="slot filled" style="border-left:3px solid ${col}">
+        <div class="slot-icon" style="background:${col}22;color:${col}">${s.icon}</div>
+        <div class="slot-info">
+          <div class="slot-job">${s.label}</div>
+          <div class="slot-char">${escH(m.id)}</div>
+          <div class="slot-oper">${escH(m.operator||m.account)}</div>
+        </div>
+        <button class="slot-remove" onclick="removeFromSlot('${s.id}')" title="移除">✕</button>
+      </div>`;
+    } else {
+      return `<div class="slot empty" title="点击人物池中的 ${s.label} 角色来填入">
+        <div class="slot-icon" style="background:${col}15;color:${col}44">${s.icon}</div>
+        <div class="slot-info">
+          <div class="slot-job">${s.label}</div>
+          <div class="slot-placeholder">待选入</div>
+        </div>
+      </div>`;
+    }
+  }).join('');
+}
+
+// ── RENDER POOL ──
+function buildJobFilter() {
+  const jobs = [...new Set(RAW_DATA.map(m => getDisplayJob(m)).filter(Boolean))].sort();
+  const sel = document.getElementById('fJob');
+  jobs.forEach(j => { const o = document.createElement('option'); o.value = j; o.textContent = j; sel.appendChild(o); });
+}
+
+function renderPool() {
+  const showAvail  = document.getElementById('fAvail').checked;
+  const showCool   = document.getElementById('fCool').checked;
+  const btnAll = document.getElementById('btnAll');
+  if (btnAll) btnAll.classList.toggle('active', !showAvail && !showCool);
+  const q          = document.getElementById('fSearch').value.toLowerCase();
+  const jobFilter  = document.getElementById('fJob').value;
+
+  // compute per-member status
+  const today = document.getElementById('tDate').value;
+  let filtered = RAW_DATA.filter(m => {
+    if (m.enabled === '否') return false;
+    const st = getStatus(m);
+    if (showAvail && !showCool && st !== '可用') return false;
+    if (!showAvail && showCool && st !== '冷却中') return false;
+    if (q && ![m.id, m.account, m.operator].some(v => v.toLowerCase().includes(q))) return false;
+    if (jobFilter && getDisplayJob(m) !== jobFilter) return false;
+    return true;
+  });
+
+  // group by display job
+  const groups = {};
+  filtered.forEach(m => {
+    const dj = getDisplayJob(m);
+    if (!groups[dj]) groups[dj] = [];
+    groups[dj].push(m);
+  });
+
+  const scroll = document.getElementById('poolScroll');
+  if (filtered.length === 0) {
+    scroll.innerHTML = '<div class="pool-empty">😶 没有符合条件的人物</div>';
+    updateBadge(filtered.length);
+    updateStats();
+    return;
+  }
+
+  scroll.innerHTML = Object.entries(groups).map(([job, members]) => {
+    const col = JOB_COLOR[job] || '#8b949e';
+    const availCount = members.filter(m => getStatus(m) === '可用').length;
+    const cards = members.map(m => renderCard(m, col)).join('');
+    return `<div class="job-group">
+      <div class="job-group-header" onclick="toggleGroup(this)">
+        <div class="jg-dot" style="background:${col}"></div>
+        <span class="jg-name" style="color:${col}">${escH(job)}</span>
+        <span class="jg-count">可用 ${availCount}/${members.length}</span>
+        <span class="jg-arrow open">▼</span>
+      </div>
+      <div class="job-cards">${cards}</div>
+    </div>`;
+  }).join('');
+
+  updateBadge(filtered.length);
+  updateStats();
+}
+
+function renderCard(m, col) {
+  const inRoster = !!slotForMember(m.id);
+  const st = getStatus(m);
+  const ld = getLastDate(m);
+  const initials = (m.id||'?').slice(0, 2);
+  const badgeCls = st === '可用' ? 'sb-ok' : st === '冷却中' ? 'sb-cd' : 'sb-abs';
+  const badgeLabel = st === '可用' ? '✔ 可用' : st === '冷却中' ? '⏳ 冷却中' : '缺席';
+  const mJson = JSON.stringify(m).replace(/"/g, '&quot;');
+  return `<div class="char-card${inRoster ? ' in-roster' : ''}${st === '冷却中' ? ' cooling' : ''}"
+    data-m="${mJson}"
+    onclick="addToRosterStr(this.dataset.m)"
+    title="${escH(getDisplayJob(m))} · ${escH(m.id)} · ${escH(m.operator||m.account)}">
+    <div class="avatar" style="background:${col}22;color:${col};border-color:${col}44">${escH(initials)}</div>
+    <div class="info">
+      <div class="cid">${escH(m.id)}</div>
+      <div class="cmeta">归属：${escH(m.account)}&nbsp;&nbsp;操作：${escH(m.operator)}</div>
+      <div class="cdate">上次：${ld||'—'}</div>
+    </div>
+    <span class="stat-badge ${badgeCls}">${badgeLabel}</span>
+  </div>`;
+}
+
+function addToRosterStr(mStr) {
+  const m = JSON.parse(mStr);
+  if (getStatus(m) === '冷却中') { toast('⏳ ' + m.id + ' 冷却中，无法选入'); return; }
+  addToRoster(m);
+}
+
+// ── SHOW ALL ──
+function showAll() {
+  document.getElementById('fAvail').checked = false;
+  document.getElementById('fCool').checked = false;
+  renderPool();
+}
+
+// ── TOGGLE GROUP ──
+function toggleGroup(header) {
+  const cards = header.nextElementSibling;
+  const arrow = header.querySelector('.jg-arrow');
+  const hidden = cards.style.display === 'none';
+  cards.style.display = hidden ? 'grid' : 'none';
+  arrow.classList.toggle('open', hidden);
+}
+
+// ── STATS ──
+function updateBadge(n) {
+  document.getElementById('poolBadge').textContent = n + ' 人';
+}
+function updateStats() {
+  const enabled = RAW_DATA.filter(m => m.enabled !== '否');
+  const disabled = RAW_DATA.filter(m => m.enabled === '否').length;
+  const ok  = enabled.filter(m => getStatus(m) === '可用').length;
+  const cd  = enabled.filter(m => getStatus(m) === '冷却中').length;
+  document.getElementById('stOk').textContent  = ok;
+  document.getElementById('stCd').textContent  = cd;
+  document.getElementById('stDis').textContent = disabled;
+  document.getElementById('stTot').textContent = RAW_DATA.length;
+  const ccEl = document.getElementById('cdCount');
+  if (ccEl) { ccEl.textContent = cd; document.getElementById('btnReset').classList.toggle('has-cd', cd > 0); }
+}
+
+// ── CONFIRM RECORD ──
+function confirmRecord() {
+  const filled = SLOTS.filter(s => roster[s.id]);
+  if (filled.length === 0) { toast('还没有选入任何人物'); return; }
+  if (!confirm(`确认记录本次出战的 ${filled.length} 位人物，并更新冷却？`)) return;
+  const date = document.getElementById('tDate').value;
+  const cd   = parseInt(document.getElementById('tCD').value) || 3;
+  const cdDate = addDays(date, cd);
+  filled.forEach(s => {
+    const m = roster[s.id];
+    cdOverrides[m.id] = { last_date: date, cd_date: cdDate };
+  });
+  saveHistory(date, filled);
+  saveLS();
+  renderPool();
+  toast('✔ 记录已确认，冷却日期已更新');
+}
+
+function addDays(dateStr, days) {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0,10);
+}
+
+// ── WECHAT TEXT ──
+function genWechat() {
+  const filled = SLOTS.filter(s => roster[s.id]);
+  if (filled.length === 0) { toast('阵容为空，无法生成文本'); return; }
+  const car = document.getElementById('tCar').value;
+  const date = document.getElementById('tDate').value.replace(/-/g,'/');
+  let txt = car + '　' + date + '\n\n';
+  txt += filled.map(s => {
+    const m = roster[s.id];
+    return `${s.label}：${m.operator||m.account} → ${m.id}`;
+  }).join('\n');
+  document.getElementById('wechatText').style.cssText = 'color:var(--text);font-style:normal';
+  document.getElementById('wechatText').textContent = txt;
+}
+function copyText() {
+  const txt = document.getElementById('wechatText').textContent;
+  if (!txt || txt.includes('点击')) { toast('请先生成文本'); return; }
+  navigator.clipboard.writeText(txt).then(() => toast('✔ 已复制到剪贴板')).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('✔ 已复制');
+  });
+}
+
+// ── CLEAR ──
+function clearRoster() {
+  if (!confirm('清空本车所有阵容？')) return;
+  roster = {};
+  saveLS();
+  renderRoster();
+  renderPool();
+  document.getElementById('wechatText').style.cssText='color:var(--text3);font-style:italic';
+  document.getElementById('wechatText').textContent='点击「生成微信群文本」后显示…';
+}
+
+// ── CAR NAVIGATION ──
+function updateNavBtns() {
+  const sel = document.getElementById('tCar');
+  document.getElementById('btnPrev').disabled = currentCarIdx <= 0;
+  document.getElementById('btnNext').disabled = currentCarIdx >= sel.options.length - 1;
+}
+function prevCar() {
+  if (currentCarIdx <= 0) return;
+  saveRosterForCar(currentCarIdx);
+  currentCarIdx--;
+  document.getElementById('tCar').selectedIndex = currentCarIdx;
+  loadRosterForCar(currentCarIdx);
+  renderRoster(); renderPool(); updateNavBtns();
+}
+function nextCar() {
+  const sel = document.getElementById('tCar');
+  if (currentCarIdx >= sel.options.length - 1) return;
+  saveRosterForCar(currentCarIdx);
+  currentCarIdx++;
+  sel.selectedIndex = currentCarIdx;
+  loadRosterForCar(currentCarIdx);
+  renderRoster(); renderPool(); updateNavBtns();
+}
+
+// ── SAVE ──
+function saveRoster() {
+  saveLS();
+  toast('💾 已保存');
+}
+
+// ── SAVE HISTORY ──
+function saveHistory(date, filled) {
+  const carEl = document.getElementById('tCar');
+  const car = carEl.options[carEl.selectedIndex].text;
+  const entry = {
+    date,
+    car,
+    savedAt: new Date().toISOString().slice(0,16).replace('T',' '),
+    roster: filled.map(s => ({
+      label:    s.label,
+      id:       roster[s.id].id,
+      operator: roster[s.id].operator || roster[s.id].account,
+    }))
+  };
+  let hist = [];
+  try { hist = JSON.parse(localStorage.getItem(LS_HIST)||'[]'); } catch{}
+  hist.unshift(entry);
+  if (hist.length > 60) hist.length = 60;
+  localStorage.setItem(LS_HIST, JSON.stringify(hist));
+}
+
+// ── RESET ALL AVAILABLE ──
+function resetAllAvailable() {
+  if (!confirm('清除所有冷却记录，将所有角色重置为可用状态？')) return;
+  cdOverrides = {};
+  RAW_DATA.filter(m => m.cd_date && m.cd_date > '1970-01-01').forEach(m => {
+    cdOverrides[m.id] = { cd_date: '', last_date: m.last_date || '' };
+  });
+  saveLS();
+  renderPool();
+  toast('♻ 所有角色已重置为可用');
+}
+
+// ── CLEAR WECHAT TEXT ──
+function clearWechat() {
+  document.getElementById('wechatText').style.cssText = 'color:var(--text3);font-style:italic';
+  document.getElementById('wechatText').textContent = '点击「生成微信群文本」后显示…';
+}
+
+// ── REFRESH ──
+function refreshPool() {
+  cdOverrides = {};
+  localStorage.removeItem(LS_CD);
+  renderPool();
+  toast('↺ 数据已从原始数据刷新');
+}
+
+// ── TOAST ──
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── UTILS ──
+function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+document.getElementById('tDate').addEventListener('change', () => { renderPool(); renderRoster(); });
+
+// ── VIEW SWITCHING ──
+function showView(v) {
+  document.getElementById('viewHome').classList.toggle('active', v === 'home');
+  document.getElementById('viewTeam').classList.toggle('active', v === 'team');
+  if (v === 'home') renderHomeHist();
+}
+
+// ── CD RULE EDITABLE ──
+function editCD() {
+  document.getElementById('cdValDisp').style.display = 'none';
+  const inp = document.getElementById('tCD');
+  inp.style.display = 'inline-block';
+  inp.focus(); inp.select();
+}
+function lockCD() {
+  const inp = document.getElementById('tCD');
+  const val = Math.max(1, Math.min(30, parseInt(inp.value) || 3));
+  inp.value = val;
+  inp.style.display = 'none';
+  const d = document.getElementById('cdValDisp');
+  d.textContent = val; d.style.display = '';
+}
+
+// ── HOME HISTORY ──
+let histOpen = false;
+function renderHomeHist() {
+  let hist = [];
+  try { hist = JSON.parse(localStorage.getItem(LS_HIST)||'[]'); } catch{}
+  document.getElementById('histCount').textContent = hist.length + ' 条';
+  const list = document.getElementById('homeHistList');
+  if (hist.length === 0) {
+    list.innerHTML = '<div class="hist-empty">😶 暂无历史记录<br><span style="font-size:11px">在星座团中点击「✦ 确认记录并更新」后，记录将显示在这里</span></div>';
+    return;
+  }
+  list.innerHTML = hist.map(entry => {
+    const slots = (entry.roster||[]).map(r =>
+      `<span class="hist-slot"><span class="hist-slot-lbl">${escH(r.label)}：</span>${escH(r.operator)} → ${escH(r.id)}</span>`
+    ).join('');
+    return `<div class="hist-entry-card">
+      <div class="hist-entry-head">
+        <span class="hist-date">${escH(entry.date)}</span>
+        <span class="hist-car">${escH(entry.car)}</span>
+        <span class="hist-time">${escH(entry.savedAt)}</span>
+      </div>
+      <div class="hist-slots">${slots}</div>
+    </div>`;
+  }).join('');
+}
+function toggleHist() {
+  histOpen = !histOpen;
+  document.getElementById('homeHistList').classList.toggle('show', histOpen);
+  const btn = document.getElementById('btnToggle');
+  btn.textContent = histOpen ? '收起' : '展开';
+  btn.classList.toggle('active', histOpen);
+}
+function clearHist() {
+  if (!confirm('清除所有历史记录？此操作不可撤销。')) return;
+  localStorage.removeItem(LS_HIST);
+  renderHomeHist();
+}
+document.getElementById('tCar').addEventListener('change', function() {
+  if (this.selectedIndex === currentCarIdx) return;
+  saveRosterForCar(currentCarIdx);
+  currentCarIdx = this.selectedIndex;
+  loadRosterForCar(currentCarIdx);
+  renderRoster(); renderPool(); updateNavBtns();
+});
+
+// ── DRAG-TO-RESIZE DIVIDER ──
+(function(){
+  const resizer   = document.getElementById('resizer');
+  const panelLeft = document.querySelector('.panel-left');
+  const main      = document.querySelector('.main');
+  // restore saved width
+  const savedDiv = parseInt(localStorage.getItem(LS_DIV));
+  if (savedDiv > 0) panelLeft.style.width = savedDiv + 'px';
+  let startX, startW;
+  resizer.addEventListener('mousedown', e => {
+    e.preventDefault();
+    startX = e.clientX;
+    startW = panelLeft.offsetWidth;
+    resizer.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDrag);
+  });
+  function onDrag(e) {
+    const mainW = main.offsetWidth;
+    const maxW  = Math.floor(mainW * 0.5);
+    const minW  = 260;
+    let newW = startW + (e.clientX - startX);
+    newW = Math.max(minW, Math.min(maxW, newW));
+    panelLeft.style.width = newW + 'px';
+  }
+  function stopDrag() {
+    resizer.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', stopDrag);
+    localStorage.setItem(LS_DIV, panelLeft.offsetWidth);
+  }
+})();
+
+init();
+</script>
+</body>
+</html>
