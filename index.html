@@ -161,6 +161,46 @@ body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t
 .view{display:none}
 #viewHome.active{display:block;min-height:100vh}
 #viewTeam.active{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+#viewRoster.active{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* ─── ROSTER VIEW ─── */
+.rv-body{flex:1;overflow:auto;padding:0}
+.rv-sched-wrap{padding:14px 18px;overflow-x:auto}
+.rv-sched-table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px;white-space:nowrap}
+.rv-sched-table th{background:var(--bg2);color:var(--text2);font-weight:600;font-size:11px;padding:8px 10px;text-align:center;border-bottom:2px solid var(--border)}
+.rv-sched-table th.rv-job-col{text-align:left;min-width:140px;position:sticky;left:0;z-index:3}
+.rv-sched-table th.rv-cur-col{background:#1a1400;color:var(--gold);border-bottom-color:#5a4200}
+.rv-sched-table td{padding:6px 8px;border-bottom:1px solid #1c2128;vertical-align:top;min-width:115px}
+.rv-sched-table td.rv-job-td{background:var(--bg2);position:sticky;left:0;z-index:2;border-right:1px solid var(--border)}
+.rv-sched-table td.rv-cur-td{background:#110e00}
+.rv-sched-table tr:hover td{background:var(--bg4)}
+.rv-sched-table tr:hover td.rv-cur-td{background:#1a1400}
+.rv-sched-table tr:hover td.rv-job-td{background:var(--bg3)}
+.rv-job-lbl{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:700}
+.rv-char-cell{display:flex;flex-direction:column;gap:2px}
+.rv-char-row{display:flex;align-items:flex-start;gap:4px}
+.rv-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.rv-dot-ok{background:var(--green)}.rv-dot-cd{background:var(--yellow)}.rv-dot-abs{background:var(--red)}
+.rv-char-name{color:#e8f0ff;font-size:12px}.rv-char-name.rv-cd{color:var(--yellow)}
+.rv-char-acct{color:var(--text3);font-size:10px;padding-left:10px}
+/* list table */
+.rv-list-wrap{padding:14px 18px}
+.rv-list-table{width:100%;border-collapse:collapse;font-size:12px}
+.rv-list-table th{background:var(--bg2);color:var(--text2);font-weight:600;font-size:11px;padding:8px 12px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap}
+.rv-list-table td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.rv-list-table tr:hover td{background:var(--bg4)}
+/* alert banner */
+.data-alert{background:#2d1500;border:1px solid #7a3500;border-radius:8px;padding:10px 16px;margin:10px 18px;font-size:12px;color:#ff9f40;line-height:1.9;display:none}
+.data-alert b{color:#ffb870;font-size:11px}
+.data-alert-row{padding:1px 0}
+/* view toggle (roster) */
+.rv-toggle{display:flex;gap:0;border:1px solid var(--border2);border-radius:7px;overflow:hidden}
+.rv-tb{background:var(--bg3);color:var(--text2);border:none;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit;transition:background .15s,color .15s}
+.rv-tb.on{background:#1a1400;color:var(--gold);font-weight:700}
+.rv-tb:hover:not(.on){background:var(--bg4);color:var(--text)}
+/* legend bar */
+.rv-legend{padding:7px 18px 5px;display:flex;gap:14px;align-items:center;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.rv-leg{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2)}
 
 /* ─── HOME PAGE ─── */
 .hero{background:linear-gradient(160deg,#0f1628 0%,#1a1030 55%,#0b0e17 100%);border-bottom:1px solid var(--border);padding:52px 40px 44px;text-align:center;position:relative;overflow:hidden}
@@ -201,6 +241,12 @@ body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t
 .hist-slot-lbl{color:var(--text3)}
 .hist-empty{text-align:center;padding:32px 20px;color:var(--text3);font-size:13px;line-height:2.2}
 
+/* ─── SCHEDULE BADGES ─── */
+.sched-badge{position:absolute;top:28px;right:8px;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap}
+.sched-cur{background:#1a1400;color:#f0a500;border:1px solid #5a4200}
+.sched-oth{background:var(--bg4);color:var(--text3);border:1px solid var(--border)}
+.char-card.sched-active{border-color:var(--gold)!important;background:var(--bg4)}
+
 /* ─── CD RULE EDITABLE ─── */
 .cd-edit-wrap{display:flex;align-items:center;gap:4px}
 .cd-val{background:var(--bg3);color:var(--gold);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-size:13px;font-weight:700;cursor:pointer;min-width:34px;text-align:center;transition:border-color .15s;line-height:1}
@@ -212,6 +258,43 @@ body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t
 .btn-reset{background:transparent;border:1px solid var(--border2);border-radius:5px;padding:2px 8px;font-size:11px;color:var(--text3);cursor:pointer;font-family:inherit;transition:color .15s,border-color .15s;line-height:1.6}
 .btn-reset:hover{color:var(--gold);border-color:var(--gold)}
 .btn-reset.has-cd{color:var(--yellow);border-color:var(--yellow2)}
+
+/* ─── XING CHAT WINDOW ─── */
+#xingFloatBtn{position:fixed;bottom:24px;right:24px;width:52px;height:52px;background:linear-gradient(135deg,#f0a500,#ff6b35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;z-index:1001;box-shadow:0 4px 20px #f0a50055;border:none;font-family:inherit;transition:transform .2s,box-shadow .2s}
+#xingFloatBtn:hover{transform:scale(1.1);box-shadow:0 6px 28px #f0a50077}
+#xingPanel{position:fixed;bottom:88px;right:24px;width:360px;height:480px;background:var(--bg2);border:1px solid var(--border2);border-radius:16px;z-index:1001;display:none;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+.xhd{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1a1400,#1c1830);border-radius:16px 16px 0 0}
+.xhd-icon{font-size:18px}.xhd-title{flex:1;font-size:13px;font-weight:700;color:#e8f0ff}
+.xhd-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:3px 5px;line-height:1;border-radius:4px}
+.xhd-btn:hover{color:var(--text);background:var(--bg4)}
+.xchat{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.xchat::-webkit-scrollbar{width:4px}.xchat::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.xmsg{display:flex;gap:7px;max-width:92%}
+.xmsg.user{align-self:flex-end;flex-direction:row-reverse}.xmsg.xing{align-self:flex-start}
+.xmsg-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.xmsg.xing .xmsg-av{background:linear-gradient(135deg,#f0a500,#ff6b35)}.xmsg.user .xmsg-av{background:var(--bg4);color:var(--text2)}
+.xmsg-bbl{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:7px 10px;font-size:12px;color:var(--text);line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.xmsg.user .xmsg-bbl{background:#1a1400;border-color:#5a4200}
+.xmsg-actions{display:flex;gap:6px;padding:2px 0 6px;padding-left:33px}
+.xact-btn{border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
+.xact-ok{background:linear-gradient(135deg,#f0a500,#d97706);color:#000}.xact-no{background:var(--bg3);border:1px solid var(--border2);color:var(--text2)}
+.xinput-wrap{padding:8px 10px;border-top:1px solid var(--border);display:flex;gap:6px;align-items:center}
+.ximg-lbl{width:30px;height:30px;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;flex-shrink:0;transition:border-color .15s}
+.ximg-lbl:hover{border-color:var(--gold)}.ximg-lbl input{display:none}
+.xtext-inp{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);font-family:inherit;outline:none}
+.xtext-inp:focus{border-color:var(--gold)}
+.xsend-btn{background:linear-gradient(135deg,#f0a500,#d97706);border:none;border-radius:7px;padding:7px 11px;color:#000;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.xsend-btn:hover{opacity:.85}
+#xingSettingsModal{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:2000;display:none;align-items:center;justify-content:center}
+.xmodal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:22px;width:340px;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+.xmodal h3{font-size:14px;font-weight:700;color:#e8f0ff;margin-bottom:10px}
+.xmodal p{font-size:11px;color:var(--text2);line-height:1.7;margin-bottom:14px}
+.xmodal label{font-size:11px;color:var(--text3);display:block;margin-bottom:5px}
+.xmodal input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;font-size:12px;color:var(--text);font-family:inherit;outline:none;margin-bottom:12px}
+.xmodal input:focus{border-color:var(--gold)}
+.xmodal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.xmbtn-cancel{background:var(--bg3);color:var(--text2);border:1px solid var(--border2);border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit}
+.xmbtn-save{background:linear-gradient(135deg,#f0a500,#d97706);border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#000;font-family:inherit}
 </style>
 </head>
 <body>
@@ -228,12 +311,18 @@ body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t
     </div>
   </div>
   <div class="home-section">
-    <div class="home-section-label">副本团队</div>
+    <div class="home-section-label">功能入口</div>
     <div class="h-entries">
       <div class="h-entry" onclick="showView('team')">
-        <div class="h-entry-icon">⭐</div>
-        <div class="h-entry-title">星座团</div>
+        <div class="h-entry-icon">⚔</div>
+        <div class="h-entry-title">车次阵容记录</div>
         <div class="h-entry-desc">星座塔副本 · 11 职位组队助手<br>人物池 · 冷却管理 · 微信群文本</div>
+        <span class="h-entry-enter">进入 →</span>
+      </div>
+      <div class="h-entry" onclick="openRoster()">
+        <div class="h-entry-icon">📋</div>
+        <div class="h-entry-title">人物库</div>
+        <div class="h-entry-desc">星座塔全体成员名单<br>按职业 / 状态 / 账号筛选查看</div>
         <span class="h-entry-enter">进入 →</span>
       </div>
     </div>
@@ -243,6 +332,7 @@ body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t
       <h2>📋 历史记录</h2>
       <span class="hist-count" id="histCount">0 条</span>
       <button class="btn-sm" id="btnToggle" onclick="toggleHist()">展开</button>
+      <button class="btn-sm" onclick="exportHistExcel()">📊 导出</button>
       <button class="btn-sm danger" onclick="clearHist()">🗑 清除全部</button>
     </div>
     <div class="hist-list" id="homeHistList"></div>
@@ -256,7 +346,7 @@ body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t
 <div class="topbar">
   <div class="logo">
     <div class="logo-icon">⭐</div>
-    <div class="logo-text">星座塔组队助手</div>
+    <div class="logo-text">车次阵容记录</div>
   </div>
   <div class="topbar-sep"></div>
   <div class="topbar-field">
@@ -361,17 +451,139 @@ body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t
 <div class="toast" id="toast"></div>
 </div><!-- /viewTeam -->
 
+<!-- ══ ROSTER VIEW ══ -->
+<div id="viewRoster" class="view">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-icon">📋</div>
+      <div class="logo-text">人物库 · 开车顺序</div>
+    </div>
+    <div class="topbar-sep"></div>
+    <div class="topbar-field">
+      <label>车次高亮</label>
+      <select id="rCar" onchange="renderRosterSched()">
+        <option value="">不高亮</option>
+        <option value="0">第 1 车</option><option value="1">第 2 车</option>
+        <option value="2">第 3 车</option><option value="3">第 4 车</option>
+        <option value="4">第 5 车</option><option value="5">第 6 车</option>
+        <option value="6">第 7 车</option><option value="7">第 8 车</option>
+        <option value="8">第 9 车</option><option value="9">第 10 车</option>
+      </select>
+    </div>
+    <div class="topbar-sep"></div>
+    <div class="topbar-field">
+      <label>搜索</label>
+      <input type="text" id="rSearch" placeholder="角色名 / 账号…" oninput="renderRosterCurrent()" style="width:170px">
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="rv-toggle">
+      <button class="rv-tb on" id="rBtnSched" onclick="rSwitchView('sched')">排班视图</button>
+      <button class="rv-tb" id="rBtnList"  onclick="rSwitchView('list')">名单视图</button>
+    </div>
+    <button class="btn btn-ghost" onclick="showView('home')">🏠 首页</button>
+  </div>
+  <!-- DATA ALERT -->
+  <div class="data-alert" id="dataAlert"></div>
+  <!-- LEGEND -->
+  <div class="rv-legend">
+    <div class="rv-leg"><span class="rv-dot rv-dot-ok"></span>可用</div>
+    <div class="rv-leg"><span class="rv-dot rv-dot-cd"></span>冷却中</div>
+    <div class="rv-leg"><span class="rv-dot rv-dot-abs"></span>缺席/未知</div>
+    <div class="rv-leg" style="color:var(--gold)">★ 当前高亮车次</div>
+    <span id="dataAlertBadge" style="display:none;margin-left:auto;background:#2d1500;border:1px solid #7a3500;border-radius:12px;padding:2px 10px;font-size:11px;color:#ff9f40;cursor:pointer" onclick="toggleDataAlert()">⚠ 数据不一致</span>
+  </div>
+  <!-- SCHED VIEW -->
+  <div class="rv-body" id="rSchedBody">
+    <div class="rv-sched-wrap">
+      <table class="rv-sched-table" id="rSchedTable"></table>
+    </div>
+  </div>
+  <!-- LIST VIEW -->
+  <div class="rv-body" id="rListBody" style="display:none">
+    <div class="rv-list-wrap">
+      <table class="rv-list-table">
+        <thead><tr>
+          <th>#</th><th>人物ID</th><th>归属账号</th><th>职业</th>
+          <th>默认操作者</th><th>最近参与</th><th>冷却到期</th><th>状态</th><th>启用</th>
+        </tr></thead>
+        <tbody id="rListTbody"></tbody>
+      </table>
+      <div id="rListEmpty" style="text-align:center;padding:40px;color:var(--text3);font-size:13px;display:none">😶 没有符合条件的成员</div>
+    </div>
+  </div>
+</div><!-- /viewRoster -->
+
+<!-- ── 小星悬浮按钮 ── -->
+<button id="xingFloatBtn" onclick="toggleXing()" title="问小星">⭐</button>
+
+<!-- ── 小星对话窗口 ── -->
+<div id="xingPanel">
+  <div class="xhd">
+    <span class="xhd-icon">⭐</span>
+    <span class="xhd-title">小星助手</span>
+    <button class="xhd-btn" onclick="openXingSettings()" title="API 设置">⚙</button>
+    <button class="xhd-btn" onclick="toggleXing()" title="关闭">✕</button>
+  </div>
+  <div class="xchat" id="xchat"></div>
+  <div class="xinput-wrap">
+    <label class="ximg-lbl" title="发截图识别阵容">📷<input type="file" accept="image/*" onchange="handleScreenshot(this)"></label>
+    <input class="xtext-inp" id="xingInput" placeholder="问小星任何关于阵容的问题…" onkeydown="if(event.key==='Enter')xingSend()">
+    <button class="xsend-btn" onclick="xingSend()">发送</button>
+  </div>
+</div>
+
+<!-- ── 小星 API 设置弹窗 ── -->
+<div id="xingSettingsModal">
+  <div class="xmodal">
+    <h3>⚙ 小星 API 设置</h3>
+    <p>截图识别功能需要 Anthropic API Key。<br>Key 仅保存在本地浏览器中，不会上传到任何服务器。</p>
+    <label>Anthropic API Key</label>
+    <input type="password" id="xingKeyInput" placeholder="sk-ant-api03-…">
+    <label>识别模型（默认可不填）</label>
+    <input type="text" id="xingModelInput" placeholder="claude-3-5-haiku-20241022">
+    <div class="xmodal-btns">
+      <button class="xmbtn-cancel" onclick="closeXingSettings()">取消</button>
+      <button class="xmbtn-save" onclick="saveXingKey()">保存</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── DATA ──
 const RAW_DATA = [{"id": "time", "account": "time", "job": "刺客", "operator": "time", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "time·刺", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time刺", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "0氪玩家", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "优质零氪玩家", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "致命影啸", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "一刀斩龙哥", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "一刀星座塔", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "1000PT", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "一刀2147M", "account": "time", "job": "刺客", "operator": "time", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "*time 智", "account": "time", "job": "元素", "operator": "布丁", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "time智", "account": "time", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "智time", "account": "time", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time元素", "account": "time", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "特丽丝", "account": "蚊子", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "幕夜星火", "account": "晨音", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "希望有古老和守护", "account": "木木", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "后入更带劲", "account": "夜蓝", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "前后都有电", "account": "夜蓝", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "充电的好新人", "account": "好心人", "job": "元素", "operator": "布丁", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "芸湮", "account": "木木", "job": "大法", "operator": "木木", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "吾心神明", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "吾言神祇", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "我有猫", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "Lueur", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "鸣蝉夜夜心", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "嘉荣", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "树树是木", "account": "木木", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "千两花火", "account": "蚊子", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "Talho Yuki", "account": "蚊子", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "EurekA", "account": "蚊子", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "Renton Thurston", "account": "蚊子", "job": "大法", "operator": "木木", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "海之星", "account": "蚊子", "job": "皇家", "operator": "蚊子", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "魑影", "account": "蚊子", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "*time 御", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time御", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "御time", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time卫士", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "皇time", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time皇家", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "皇家time", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time皇", "account": "time", "job": "皇家", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "ARX-8", "account": "布丁", "job": "机匠", "operator": "夜蓝", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "自走人形", "account": "布丁", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "人形自走", "account": "布丁", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "人形对月兵器", "account": "布丁", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "人参苦短", "account": "布丁", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "铁time", "account": "time", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time铁匠", "account": "time", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "铁匠time", "account": "time", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time铁", "account": "time", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "蚊子的秘密仓库", "account": "蚊子", "job": "机匠", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "红色好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "紫色好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "黄色好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "白色好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "绿色好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "蓝色好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "RO的好新人", "account": "好心人", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time逐影", "account": "time", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time竹影", "account": "time", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "竹影time", "account": "time", "job": "逐影", "operator": "好心人", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "月夜猫~", "account": "蚊子", "job": "主教", "operator": "白露", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "anemona", "account": "蚊子", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "恭特尔", "account": "蚊子", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "埃策尔", "account": "蚊子", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "齐格 弗里德", "account": "蚊子", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "许特格", "account": "蚊子", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "兔姬丝", "account": "兔子", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "Ferris", "account": "布丁", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "黑心圣手", "account": "白露", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "事情太多", "account": "好心人", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "助力的好新人", "account": "好心人", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "祝福的好新人", "account": "好心人", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "夜蓝忆一", "account": "夜蓝", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "*time 牧", "account": "time", "job": "主教", "operator": "白露", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "星空下的夜", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "星空下的雪", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "星空下的风", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "星空下的雨", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "呓嘻嘻", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "冷月月", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "香味果酱咖啡", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "月影子", "account": "晨音", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "白苏", "account": "木木", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "及酒", "account": "木木", "job": "主教", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "克拉夫特", "account": "晨音", "job": "诗人", "operator": "夜蓝", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "烟嗓嚎Numb", "account": "白露", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "我谈个情你浪什么", "account": "夜蓝", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "*time 诗", "account": "time", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time宫廷", "account": "time", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "time诗人", "account": "time", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "诗time", "account": "time", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "诗人time", "account": "time", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "汉宫秋月", "account": "蚊子", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "细辛属杜衡", "account": "木木", "job": "诗人", "operator": "夜蓝", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "风吹着游子飘啊飘", "account": "晨音", "job": "契灵士", "operator": "晨音", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "秋雨落绵绵", "account": "晨音", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "晚霞缓缓", "account": "晨音", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "素心若雪", "account": "晨音", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "灵月幻花香", "account": "晨音", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "花花世界迷人眼", "account": "晨音", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "777000444", "account": "time", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "希望有星月与翅膀", "account": "木木", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "仁赭神归", "account": "好心人", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "我会变你信吗", "account": "夜蓝", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "司马承祯", "account": "蚊子", "job": "契灵士", "operator": "晨音", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "衔蝉奴", "account": "蚊子", "job": "猫", "operator": "蚊子", "last_date": "2026-05-17", "cd_date": "2026-05-20", "status": "冷却中", "enabled": "是"}, {"id": "自走对月兵器", "account": "布丁", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "自走對月兵器", "account": "布丁", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "西森", "account": "木木", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "蓝双", "account": "木木", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "棕虎斑加白森林猫", "account": "木木", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "海豹双色布偶猫", "account": "木木", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "肉食猫科动物", "account": "木木", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "啊喵啊", "account": "time", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}, {"id": "泡芙小喵", "account": "白露", "job": "猫", "operator": "蚊子", "last_date": "", "cd_date": "", "status": "可用", "enabled": "是"}];
 
+// ── SCHEDULE (开车顺序，来源：星座塔开车顺序.xlsx) ──
+const SCHEDULE = {"刺客":[{"account":"time","id":"time"},{"account":"time","id":"time·刺"},{"account":"time","id":"time刺"},{"account":"time","id":"0氪玩家"},{"account":"time","id":"优质零氪玩家"},{"account":"time","id":"致命影啸"},{"account":"time","id":"一刀斩龙哥"},{"account":"time","id":"一刀星座塔"},{"account":"time","id":"1000PT"},{"account":"time","id":"一刀2147M"}],"元素":[{"account":"蚊子","id":"特丽丝"},{"account":"夜蓝","id":"后入更带劲"},{"account":"夜蓝","id":"前后都有电"},{"account":"晨音","id":"幕夜星火"},{"account":"下贱","id":"充电的好新人"},{"account":"木木","id":"希望有古老和守护"},{"account":"time","id":"*time 智"},{"account":"time","id":"time智"},{"account":"time","id":"智time"},{"account":"time","id":"time元素"}],"大法":[{"account":"木木","id":"芸湮"},{"account":"木木","id":"吾心神明"},{"account":"木木","id":"吾言神祇"},{"account":"木木","id":"我有猫"},{"account":"木木","id":"Lueur"},{"account":"木木","id":"鸣蝉夜夜心"},{"account":"木木","id":"嘉荣"},{"account":"木木","id":"树树是木"},{"account":"蚊子","id":"千两花火"},{"account":"蚊子","id":"Talho Yuki"}],"皇家":[{"account":"蚊子","id":"海之星"},{"account":"蚊子","id":"魑影"},{"account":"time","id":"*time 御"},{"account":"time","id":"time御"},{"account":"time","id":"御time"},{"account":"time","id":"time卫士"},{"account":"time","id":"皇time"},{"account":"time","id":"time皇家"},{"account":"time","id":"皇家time"},{"account":"time","id":"time皇"}],"机匠":[{"account":"布丁","id":"ARX-8"},{"account":"布丁","id":"人参苦短"},{"account":"布丁","id":"自走人形"},{"account":"布丁","id":"人形自走"},{"account":"布丁","id":"人形对月兵器"},{"account":"蚊子","id":"蚊子的秘密仓库"},{"account":"time","id":"铁time"},{"account":"time","id":"time铁匠"},{"account":"time","id":"铁匠time"},{"account":"time","id":"time铁"}],"逐影":[{"account":"time","id":"time逐影"},{"account":"time","id":"time竹影"},{"account":"time","id":"竹影time"},{"account":"下贱","id":"红色好新人"},{"account":"下贱","id":"紫色好新人"},{"account":"下贱","id":"黄色好新人"},{"account":"下贱","id":"白色好新人"},{"account":"下贱","id":"绿色好新人"},{"account":"下贱","id":"蓝色好新人"},{"account":"下贱","id":"RO的好新人"}],"主教（队长）":[{"account":"蚊子","id":"月夜猫~"},{"account":"蚊子","id":"anemona"},{"account":"下贱","id":"事情太多"},{"account":"下贱","id":"助力的好新人"},{"account":"下贱","id":"祝福的好新人"},{"account":"time","id":"*time 牧"},{"account":"布丁","id":"Ferris"},{"account":"夜蓝","id":"夜蓝忆一"},{"account":"兔子","id":"兔姬丝"},{"account":"白露","id":"黑心圣手"}],"主教（辅助）":[{"account":"晨音","id":"星空下的夜"},{"account":"晨音","id":"星空下的雨"},{"account":"晨音","id":"星空下的风"},{"account":"晨音","id":"星空下的雪"},{"account":"晨音","id":"呓嘻嘻"},{"account":"晨音","id":"冷月月"},{"account":"晨音","id":"香味果酱咖啡"},{"account":"晨音","id":"月影子"},{"account":"木木","id":"及酒"},{"account":"木木","id":"白苏"}],"诗人":[{"account":"晨音","id":"克拉夫特"},{"account":"白露","id":"烟嗓嚎Numb"},{"account":"蚊子","id":"汉宫秋月"},{"account":"夜蓝","id":"我谈个情你浪什么"},{"account":"木木","id":"细辛属杜衡"},{"account":"time","id":"*time 诗"},{"account":"time","id":"time宫廷"},{"account":"time","id":"time诗人"},{"account":"time","id":"诗time"},{"account":"time","id":"诗人time"}],"契灵士":[{"account":"晨音","id":"风吹着游子飘啊飘"},{"account":"晨音","id":"秋雨落绵绵"},{"account":"晨音","id":"晚霞缓缓"},{"account":"晨音","id":"素心若雪"},{"account":"晨音","id":"花花世界迷人眼"},{"account":"晨音","id":"灵月幻花香"},{"account":"time","id":"777000444"},{"account":"夜蓝","id":"我会变你信吗"},{"account":"木木","id":"希望有星月与翅膀"},{"account":"下贱","id":"仁赭神归"}],"猫":[{"account":"木木","id":"西森"},{"account":"木木","id":"衔蝉奴"},{"account":"木木","id":"西森"},{"account":"木木","id":"蓝双"},{"account":"木木","id":"棕虎斑加白森林猫"},{"account":"time","id":"啊喵啊"},{"account":"蚊子","id":"衔蝉奴"},{"account":"布丁","id":"自走对月兵器"},{"account":"布丁","id":"自走對月兵器"},{"account":"白露","id":"泡芙小喵"}]};
 
-// ── FEISHU API CONFIG ──
-const API_BASE = "https://feishu-raidhelper.mosreka.workers.dev";
-const LS_WRITE_TOKEN = "xzt_write_token_v1";
-let DATA = RAW_DATA.slice();
-let CLOUD_RECORDS = [];
-let USE_REMOTE = false;
+// ── SCHEDULE_ROWS：供人物库排班视图使用的数组格式 ──
+const _SCHED_ICONS   = {'刺客':'◆','元素':'✦','大法':'✧','皇家':'♛','机匠':'⚙','逐影':'◈','主教（队长）':'✙','主教（辅助）':'✙','诗人':'♪','契灵士':'✚','猫':'⁂'};
+const _SCHED_DRIVERS = {'刺客':'time','元素':'布丁','大法':'木木','皇家':'蚊子','机匠':'夜蓝','逐影':'下贱','主教（队长）':'白露','主教（辅助）':'晨音','诗人':'夜蓝','契灵士':'木木','猫':'蚊子'};
+const SCHEDULE_ROWS = Object.entries(SCHEDULE).map(([job, cars]) => ({
+  job,
+  icon:   _SCHED_ICONS[job]   || '★',
+  driver: _SCHED_DRIVERS[job] || '',
+  cars:   cars.map(c => ({a: c.account, id: c.id}))
+}));
+
+// build lookup: SCHEDULE_ID_MAP[job][memberId] = carIndex(0-based)
+const SCHEDULE_ID_MAP = {};
+(function(){
+  for (const [job, cars] of Object.entries(SCHEDULE)) {
+    SCHEDULE_ID_MAP[job] = {};
+    cars.forEach((car, i) => {
+      if (car && car.id && !(car.id in SCHEDULE_ID_MAP[job])) {
+        SCHEDULE_ID_MAP[job][car.id] = i;
+      }
+    });
+  }
+})();
+
+function getScheduleInfo(displayJob, memberId) {
+  const idx = SCHEDULE_ID_MAP[displayJob]?.[memberId];
+  if (idx === undefined) return null;
+  return { carNum: idx + 1, isCurrent: idx === currentCarIdx };
+}
 
 // 11 fixed slots
 const SLOTS = [
@@ -415,17 +627,15 @@ const LS_HIST     = 'xzt_history_v1';     // [{date,car,savedAt,roster:[{label,i
 const LS_DIV      = 'xzt_divider_v1';     // left panel width in px
 
 // ── INIT ──
-async function init() {
+function init() {
   const today = new Date();
   document.getElementById('tDate').value = today.toISOString().slice(0,10);
   currentCarIdx = document.getElementById('tCar').selectedIndex;
   loadLS();
-  await loadRemoteData();
   buildJobFilter();
   renderRoster();
   renderPool();
   updateNavBtns();
-  renderHomeHist();
 }
 
 function loadRosterForCar(idx) {
@@ -447,118 +657,26 @@ function loadLS() {
   loadRosterForCar(currentCarIdx);
 }
 function saveLS() {
-  // 阵容草稿仍保存在本地；正式挑战记录以飞书多维表格为准
+  localStorage.setItem(LS_CD, JSON.stringify(cdOverrides));
   saveRosterForCar(currentCarIdx);
-}
-
-// ── FEISHU DATA ──
-async function apiGet(path){
-  const res = await fetch(API_BASE + path);
-  if(!res.ok) throw new Error('接口请求失败：' + res.status);
-  const data = await res.json();
-  if(data && data.ok === false) throw new Error(data.error || '接口返回错误');
-  return data;
-}
-async function apiPost(path, body){
-  const res = await fetch(API_BASE + path, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(body)
-  });
-  if(!res.ok) throw new Error('接口请求失败：' + res.status);
-  const data = await res.json();
-  if(data && data.ok === false) throw new Error(data.error || '接口返回错误');
-  return data;
-}
-async function loadRemoteData(){
-  try{
-    const [chars, records] = await Promise.all([
-      apiGet('/api/characters'),
-      apiGet('/api/records')
-    ]);
-    CLOUD_RECORDS = Array.isArray(records) ? records : [];
-    DATA = enrichCharacters(Array.isArray(chars) ? chars : []);
-    USE_REMOTE = true;
-    toast('✔ 已连接飞书数据');
-  }catch(e){
-    console.warn(e);
-    DATA = RAW_DATA.slice();
-    CLOUD_RECORDS = [];
-    USE_REMOTE = false;
-    toast('⚠ 未连接飞书，当前使用内置数据');
-  }
-}
-function enrichCharacters(chars){
-  const latest = {};
-  CLOUD_RECORDS.forEach(item => {
-    const f = item.fields || item;
-    const id = normField(f['人物ID']);
-    const d = normalizeDate(f['日期']);
-    if(!id || !d) return;
-    if(!latest[id] || d > latest[id]) latest[id] = d;
-  });
-  const cdDays = parseInt(document.getElementById('tCD')?.value) || 3;
-  return chars.map(c => {
-    const id = normField(c.id || c['人物ID']);
-    const last = latest[id] || '';
-    const cd = last ? addDays(last, cdDays) : '';
-    return {
-      id,
-      account: normField(c.account || c['归属']),
-      job: normField(c.job || c['职业']),
-      operator: normField(c.operator || c['默认操作者']),
-      enabled: normalizeEnabled(c.enabled ?? c['是否启用']),
-      last_date: last,
-      cd_date: cd,
-      status: (!cd || document.getElementById('tDate').value >= cd) ? '可用' : '冷却中'
-    };
-  });
-}
-function normField(v){
-  if(v === undefined || v === null) return '';
-  if(Array.isArray(v)) return v.map(normField).join(',');
-  if(typeof v === 'object'){
-    if('text' in v) return String(v.text || '');
-    if('name' in v) return String(v.name || '');
-    if('value' in v) return String(v.value || '');
-  }
-  return String(v).trim();
-}
-function normalizeEnabled(v){
-  const s = normField(v);
-  if(v === true) return '是';
-  if(v === false) return '否';
-  return (!s || s === '是' || s.toLowerCase() === 'true' || s === '1') ? '是' : '否';
-}
-function normalizeDate(v){
-  if(v === undefined || v === null || v === '') return '';
-  if(typeof v === 'number'){
-    const d = new Date(v);
-    if(!isNaN(d)) return d.toISOString().slice(0,10);
-  }
-  const s = normField(v).replace(/\//g,'-');
-  const m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
-  if(m) return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
-  return '';
-}
-function getWriteToken(){
-  let token = localStorage.getItem(LS_WRITE_TOKEN) || '';
-  if(!token){
-    token = prompt('请输入记录员口令（WRITE_TOKEN）：') || '';
-    if(token) localStorage.setItem(LS_WRITE_TOKEN, token);
-  }
-  return token;
 }
 
 // ── MEMBER STATUS ──
 function getStatus(m) {
-  const cdStr = m.cd_date || '';
+  const ov = cdOverrides[m.id];
+  const cdStr = ov ? ov.cd_date : m.cd_date;
   const today = document.getElementById('tDate').value;
   if (!cdStr || cdStr < '1970') return '可用';
   return today < cdStr ? '冷却中' : '可用';
 }
-function getLastDate(m) { return m.last_date || ''; }
-function getCDDate(m) { return m.cd_date || ''; }
+function getLastDate(m) {
+  const ov = cdOverrides[m.id];
+  return ov ? ov.last_date : m.last_date;
+}
+function getCDDate(m) {
+  const ov = cdOverrides[m.id];
+  return ov ? ov.cd_date : m.cd_date;
+}
 
 // ── SLOT IN ROSTER ──
 function slotForMember(memberId) {
@@ -621,9 +739,8 @@ function renderRoster() {
 
 // ── RENDER POOL ──
 function buildJobFilter() {
-  const jobs = [...new Set(DATA.map(m => getDisplayJob(m)).filter(Boolean))].sort();
+  const jobs = [...new Set(RAW_DATA.map(m => getDisplayJob(m)).filter(Boolean))].sort();
   const sel = document.getElementById('fJob');
-  sel.innerHTML = '<option value="">全部职业</option>';
   jobs.forEach(j => { const o = document.createElement('option'); o.value = j; o.textContent = j; sel.appendChild(o); });
 }
 
@@ -637,7 +754,7 @@ function renderPool() {
 
   // compute per-member status
   const today = document.getElementById('tDate').value;
-  let filtered = DATA.filter(m => {
+  let filtered = RAW_DATA.filter(m => {
     if (m.enabled === '否') return false;
     const st = getStatus(m);
     if (showAvail && !showCool && st !== '可用') return false;
@@ -666,6 +783,12 @@ function renderPool() {
   scroll.innerHTML = Object.entries(groups).map(([job, members]) => {
     const col = JOB_COLOR[job] || '#8b949e';
     const availCount = members.filter(m => getStatus(m) === '可用').length;
+    // sort by schedule order; unscheduled go last
+    members.sort((a, b) => {
+      const ai = SCHEDULE_ID_MAP[job]?.[a.id] ?? 999;
+      const bi = SCHEDULE_ID_MAP[job]?.[b.id] ?? 999;
+      return ai - bi;
+    });
     const cards = members.map(m => renderCard(m, col)).join('');
     return `<div class="job-group">
       <div class="job-group-header" onclick="toggleGroup(this)">
@@ -690,7 +813,9 @@ function renderCard(m, col) {
   const badgeCls = st === '可用' ? 'sb-ok' : st === '冷却中' ? 'sb-cd' : 'sb-abs';
   const badgeLabel = st === '可用' ? '✔ 可用' : st === '冷却中' ? '⏳ 冷却中' : '缺席';
   const mJson = JSON.stringify(m).replace(/"/g, '&quot;');
-  return `<div class="char-card${inRoster ? ' in-roster' : ''}${st === '冷却中' ? ' cooling' : ''}"
+  const sched = getScheduleInfo(getDisplayJob(m), m.id);
+  const schedHtml = sched ? `<span class="sched-badge ${sched.isCurrent ? 'sched-cur' : 'sched-oth'}">车${sched.carNum}</span>` : '';
+  return `<div class="char-card${inRoster ? ' in-roster' : ''}${st === '冷却中' ? ' cooling' : ''}${sched?.isCurrent ? ' sched-active' : ''}"
     data-m="${mJson}"
     onclick="addToRosterStr(this.dataset.m)"
     title="${escH(getDisplayJob(m))} · ${escH(m.id)} · ${escH(m.operator||m.account)}">
@@ -701,6 +826,7 @@ function renderCard(m, col) {
       <div class="cdate">上次：${ld||'—'}</div>
     </div>
     <span class="stat-badge ${badgeCls}">${badgeLabel}</span>
+    ${schedHtml}
   </div>`;
 }
 
@@ -731,51 +857,34 @@ function updateBadge(n) {
   document.getElementById('poolBadge').textContent = n + ' 人';
 }
 function updateStats() {
-  const enabled = DATA.filter(m => m.enabled !== '否');
-  const disabled = DATA.filter(m => m.enabled === '否').length;
+  const enabled = RAW_DATA.filter(m => m.enabled !== '否');
+  const disabled = RAW_DATA.filter(m => m.enabled === '否').length;
   const ok  = enabled.filter(m => getStatus(m) === '可用').length;
   const cd  = enabled.filter(m => getStatus(m) === '冷却中').length;
   document.getElementById('stOk').textContent  = ok;
   document.getElementById('stCd').textContent  = cd;
   document.getElementById('stDis').textContent = disabled;
-  document.getElementById('stTot').textContent = DATA.length;
+  document.getElementById('stTot').textContent = RAW_DATA.length;
   const ccEl = document.getElementById('cdCount');
   if (ccEl) { ccEl.textContent = cd; document.getElementById('btnReset').classList.toggle('has-cd', cd > 0); }
 }
 
 // ── CONFIRM RECORD ──
-async function confirmRecord() {
+function confirmRecord() {
   const filled = SLOTS.filter(s => roster[s.id]);
   if (filled.length === 0) { toast('还没有选入任何人物'); return; }
-  if (filled.length < SLOTS.length && !confirm(`当前只选入 ${filled.length}/11 位人物，仍然确认写入飞书吗？`)) return;
-  if (!confirm(`确认记录本次出战的 ${filled.length} 位人物，并写入飞书挑战记录？`)) return;
+  if (!confirm(`确认记录本次出战的 ${filled.length} 位人物，并更新冷却？`)) return;
   const date = document.getElementById('tDate').value;
-  const car  = document.getElementById('tCar').value;
-  const writeToken = getWriteToken();
-  if(!writeToken){ toast('未输入记录员口令，已取消'); return; }
-  const payload = {
-    date,
-    car,
-    writeToken,
-    roster: filled.map(s => {
-      const m = roster[s.id];
-      return { slotLabel:s.label, job:m.job, id:m.id, operator:m.operator || m.account };
-    })
-  };
-  try{
-    const result = await apiPost('/api/save-roster', payload);
-    await loadRemoteData();
-    buildJobFilter();
-    roster = {};
-    saveLS();
-    renderRoster();
-    renderPool();
-    await renderHomeHist();
-    clearWechat();
-    toast(`✔ 已写入 ${result.added || 0} 条，跳过重复 ${result.skipped || 0} 条`);
-  }catch(e){
-    toast('写入失败：' + e.message);
-  }
+  const cd   = parseInt(document.getElementById('tCD').value) || 3;
+  const cdDate = addDays(date, cd);
+  filled.forEach(s => {
+    const m = roster[s.id];
+    cdOverrides[m.id] = { last_date: date, cd_date: cdDate };
+  });
+  saveHistory(date, filled);
+  saveLS();
+  renderPool();
+  toast('✔ 记录已确认，冷却日期已更新');
 }
 
 function addDays(dateStr, days) {
@@ -873,7 +982,14 @@ function saveHistory(date, filled) {
 
 // ── RESET ALL AVAILABLE ──
 function resetAllAvailable() {
-  toast('冷却状态由飞书挑战记录自动计算。如需重置，请在飞书中删除/修改对应挑战记录。');
+  if (!confirm('清除所有冷却记录，将所有角色重置为可用状态？')) return;
+  cdOverrides = {};
+  RAW_DATA.filter(m => m.cd_date && m.cd_date > '1970-01-01').forEach(m => {
+    cdOverrides[m.id] = { cd_date: '', last_date: m.last_date || '' };
+  });
+  saveLS();
+  renderPool();
+  toast('♻ 所有角色已重置为可用');
 }
 
 // ── CLEAR WECHAT TEXT ──
@@ -883,13 +999,11 @@ function clearWechat() {
 }
 
 // ── REFRESH ──
-async function refreshPool() {
-  await loadRemoteData();
-  buildJobFilter();
-  renderRoster();
+function refreshPool() {
+  cdOverrides = {};
+  localStorage.removeItem(LS_CD);
   renderPool();
-  renderHomeHist();
-  toast(USE_REMOTE ? '↺ 已从飞书刷新数据' : '↺ 飞书不可用，使用内置数据');
+  toast('↺ 数据已从原始数据刷新');
 }
 
 // ── TOAST ──
@@ -903,13 +1017,121 @@ function toast(msg) {
 // ── UTILS ──
 function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-document.getElementById('tDate').addEventListener('change', () => { DATA = enrichCharacters(DATA); renderPool(); renderRoster(); });
+document.getElementById('tDate').addEventListener('change', () => { renderPool(); renderRoster(); });
 
 // ── VIEW SWITCHING ──
 function showView(v) {
   document.getElementById('viewHome').classList.toggle('active', v === 'home');
   document.getElementById('viewTeam').classList.toggle('active', v === 'team');
+  document.getElementById('viewRoster').classList.toggle('active', v === 'roster');
   if (v === 'home') renderHomeHist();
+  if (v === 'roster') { renderRosterSched(); runDataCheck(); }
+}
+function openRoster() { showView('roster'); }
+
+// ── ROSTER VIEW ──
+let rView = 'sched';
+function rSwitchView(v) {
+  rView = v;
+  document.getElementById('rSchedBody').style.display = v === 'sched' ? 'block' : 'none';
+  document.getElementById('rListBody').style.display  = v === 'list'  ? 'block' : 'none';
+  document.getElementById('rBtnSched').classList.toggle('on', v === 'sched');
+  document.getElementById('rBtnList').classList.toggle('on',  v === 'list');
+  renderRosterCurrent();
+}
+function renderRosterCurrent() {
+  if (rView === 'sched') renderRosterSched();
+  else renderRosterList();
+}
+function renderRosterSched() {
+  const curIdx = document.getElementById('rCar').value !== '' ? parseInt(document.getElementById('rCar').value) : -1;
+  const q = (document.getElementById('rSearch').value || '').toLowerCase();
+  const CAR = ['第1车','第2车','第3车','第4车','第5车','第6车','第7车','第8车','第9车','第10车'];
+  // build status map from RAW_DATA
+  const stMap = {};
+  RAW_DATA.forEach(m => { stMap[m.id] = m.status; });
+  // header
+  let h = '<thead><tr><th class="rv-job-col">职业 · 驾驶员</th>';
+  for (let i = 0; i < 10; i++) h += `<th${i===curIdx?' class="rv-cur-col"':''}>${i===curIdx?'★ ':''}${CAR[i]}</th>`;
+  h += '</tr></thead>';
+  // body
+  let b = '<tbody>';
+  const JC = {'刺客':'#f85149','元素':'#39d0d0','大法':'#79c0ff','皇家':'#e3b341','机匠':'#f0883e','逐影':'#d2a8ff','主教（队长）':'#3fb950','主教（辅助）':'#26c299','诗人':'#ff9ac1','契灵士':'#58b8c8','猫':'#ffb3cc'};
+  SCHEDULE_ROWS.forEach(row => {
+    if (q) { const any = row.cars.some(c => c.id.toLowerCase().includes(q) || c.a.toLowerCase().includes(q)); if (!any) return; }
+    const col = JC[row.job] || '#8b949e';
+    b += '<tr>';
+    b += `<td class="rv-job-td"><span class="rv-job-lbl" style="background:${col}22;color:${col}">${row.icon} ${escH(row.job)}</span><br><span style="font-size:10px;color:var(--text3);padding-left:4px">驾驶员：${escH(row.driver)}</span></td>`;
+    row.cars.forEach((car, i) => {
+      const st = stMap[car.id] || '未知';
+      const dotCls = st==='可用'?'rv-dot-ok':st==='冷却中'?'rv-dot-cd':'rv-dot-abs';
+      const nmCls  = st==='冷却中'?' rv-cd':'';
+      const hl = q && (car.id.toLowerCase().includes(q)||car.a.toLowerCase().includes(q));
+      const tdCls = i===curIdx?' rv-cur-td':'';
+      const nmStyle = hl?' style="background:#1f2d00;border-radius:3px;padding:1px 3px"':'';
+      b += `<td class="${tdCls}"><div class="rv-char-cell"><div class="rv-char-row"><span class="rv-dot ${dotCls}"></span><span class="rv-char-name${nmCls}"${nmStyle}>${escH(car.id)}</span></div><span class="rv-char-acct">${escH(car.a)}</span></div></td>`;
+    });
+    b += '</tr>';
+  });
+  b += '</tbody>';
+  document.getElementById('rSchedTable').innerHTML = h + b;
+}
+function renderRosterList() {
+  const q = (document.getElementById('rSearch').value || '').toLowerCase();
+  const tb = document.getElementById('rListTbody');
+  const SC = {可用:'<span style="background:#0d2116;color:#3fb950;border:1px solid #1a4428;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">✔ 可用</span>',冷却中:'<span style="background:#2d2000;color:#e3b341;border:1px solid #5a4000;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">⏳ 冷却中</span>',缺席:'<span style="background:#2d1b1b;color:#f85149;border:1px solid #5a1e1e;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">❌ 缺席</span>'};
+  tb.innerHTML = ''; let n = 0;
+  RAW_DATA.forEach(m => {
+    if (q && ![m.id,m.account,m.operator,m.job].some(v=>v.toLowerCase().includes(q))) return;
+    n++;
+    tb.innerHTML += `<tr><td style="color:var(--text3);font-size:11px">${n}</td><td style="font-family:Consolas,monospace;color:#e8f0ff">${escH(m.id)}</td><td><span style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:1px 7px;font-size:11px;color:#79c0ff">${escH(m.account)}</span></td><td style="color:var(--text2);font-size:12px">${escH(m.job)}</td><td><span style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:1px 7px;font-size:11px;color:#79c0ff">${escH(m.operator)}</span></td><td style="color:var(--text2);font-size:11px">${m.last_date||'—'}</td><td style="color:var(--text2);font-size:11px">${m.cd_date||'—'}</td><td>${SC[m.status]||`<span style="color:var(--text3)">${escH(m.status)}</span>`}</td><td style="color:${m.enabled==='是'?'var(--green)':'var(--red)'};font-weight:600;font-size:12px">${escH(m.enabled)}</td></tr>`;
+  });
+  document.getElementById('rListEmpty').style.display = n===0?'block':'none';
+}
+
+// ── DATA CONSISTENCY CHECK ──
+let dataAlertVisible = false;
+function runDataCheck() {
+  const issues = [];
+  // Build RAW_DATA lookup by id
+  const rdMap = {};
+  RAW_DATA.forEach(m => { rdMap[m.id] = m; });
+  // Build SCHEDULE id set (all ids that appear in any car slot)
+  const schedIds = new Set();
+  SCHEDULE_ROWS.forEach(row => row.cars.forEach(c => { if (c.id) schedIds.add(c.id); }));
+  // Check 1: SCHEDULE → RAW_DATA
+  SCHEDULE_ROWS.forEach(row => {
+    row.cars.forEach((car, i) => {
+      if (!car.id) return;
+      if (!rdMap[car.id]) {
+        issues.push(`⚠ <b>排班表有、人物池无</b>：[${row.job}] 第${i+1}车 "${car.id}"（账号：${car.a}）`);
+      } else if (rdMap[car.id].account !== car.a) {
+        issues.push(`⚠ <b>账号不一致</b>："${car.id}" — 人物池="${rdMap[car.id].account}"，排班表="${car.a}"`);
+      }
+    });
+  });
+  // Check 2: RAW_DATA → SCHEDULE (enabled only)
+  RAW_DATA.filter(m => m.enabled === '是').forEach(m => {
+    if (!schedIds.has(m.id)) {
+      issues.push(`ℹ <b>人物池有、排班表无</b>："${m.id}"（${m.job}，归属：${m.account}）`);
+    }
+  });
+  const alertEl = document.getElementById('dataAlert');
+  const badgeEl = document.getElementById('dataAlertBadge');
+  if (issues.length === 0) {
+    alertEl.style.display = 'none';
+    badgeEl.style.display = 'none';
+    dataAlertVisible = false;
+  } else {
+    badgeEl.style.display = '';
+    badgeEl.textContent = `⚠ 数据不一致 (${issues.length})`;
+    alertEl.innerHTML = `<b>数据一致性检查报告（${issues.length} 条）：</b><br>` + issues.map(s=>`<div class="data-alert-row">${s}</div>`).join('');
+    if (dataAlertVisible) alertEl.style.display = 'block';
+  }
+}
+function toggleDataAlert() {
+  dataAlertVisible = !dataAlertVisible;
+  document.getElementById('dataAlert').style.display = dataAlertVisible ? 'block' : 'none';
 }
 
 // ── CD RULE EDITABLE ──
@@ -926,34 +1148,17 @@ function lockCD() {
   inp.style.display = 'none';
   const d = document.getElementById('cdValDisp');
   d.textContent = val; d.style.display = '';
-  DATA = enrichCharacters(DATA);
-  renderPool();
 }
 
 // ── HOME HISTORY ──
 let histOpen = false;
-async function renderHomeHist() {
-  const list = document.getElementById('homeHistList');
-  const records = CLOUD_RECORDS || [];
-  const groups = {};
-  records.forEach(item => {
-    const f = item.fields || item;
-    const date = normalizeDate(f['日期']);
-    const car = normField(f['车次']);
-    const id = normField(f['人物ID']);
-    if(!date || !car || !id) return;
-    const key = date + '|' + car;
-    if(!groups[key]) groups[key] = { date, car, savedAt:normField(f['记录时间']) || '', roster:[] };
-    groups[key].roster.push({
-      label: normField(f['职业']),
-      id,
-      operator: normField(f['驾驶员'])
-    });
-  });
-  const hist = Object.values(groups).sort((a,b) => (b.date + b.car).localeCompare(a.date + a.car)).slice(0,60);
+function renderHomeHist() {
+  let hist = [];
+  try { hist = JSON.parse(localStorage.getItem(LS_HIST)||'[]'); } catch{}
   document.getElementById('histCount').textContent = hist.length + ' 条';
+  const list = document.getElementById('homeHistList');
   if (hist.length === 0) {
-    list.innerHTML = '<div class="hist-empty">😶 暂无历史记录<br><span style="font-size:11px">点击「✦ 确认记录并更新」后，记录将写入飞书并显示在这里</span></div>';
+    list.innerHTML = '<div class="hist-empty">😶 暂无历史记录<br><span style="font-size:11px">在星座团中点击「✦ 确认记录并更新」后，记录将显示在这里</span></div>';
     return;
   }
   list.innerHTML = hist.map(entry => {
@@ -978,7 +1183,9 @@ function toggleHist() {
   btn.classList.toggle('active', histOpen);
 }
 function clearHist() {
-  toast('历史记录来自飞书挑战记录，不能在网页端清空。请到飞书多维表格中管理。');
+  if (!confirm('清除所有历史记录？此操作不可撤销。')) return;
+  localStorage.removeItem(LS_HIST);
+  renderHomeHist();
 }
 document.getElementById('tCar').addEventListener('change', function() {
   if (this.selectedIndex === currentCarIdx) return;
@@ -1024,6 +1231,197 @@ document.getElementById('tCar').addEventListener('change', function() {
     localStorage.setItem(LS_DIV, panelLeft.offsetWidth);
   }
 })();
+
+// ── EXPORT HISTORY AS CSV (Excel-compatible) ──
+function exportHistExcel() {
+  let hist = [];
+  try { hist = JSON.parse(localStorage.getItem(LS_HIST)||'[]'); } catch{}
+  if (!hist.length) { toast('暂无历史记录可导出'); return; }
+  const rows = [['日期','车次','记录时间','职位','角色ID','操作人']];
+  hist.forEach(entry => {
+    (entry.roster||[]).forEach(r => {
+      rows.push([entry.date, entry.car, entry.savedAt, r.label, r.id, r.operator]);
+    });
+  });
+  const csv = '\uFEFF' + rows.map(r => r.map(v => '"' + String(v||'').replace(/"/g,'""') + '"').join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '布丁工会_历史记录_' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+  toast('📊 历史记录已导出');
+}
+
+// ── XING CHAT ──
+const LS_XING_KEY   = 'xzt_xing_key_v1';
+const LS_XING_MODEL = 'xzt_xing_model_v1';
+let xingOpen = false;
+let xingPendingMatch = [];
+
+function toggleXing() {
+  xingOpen = !xingOpen;
+  document.getElementById('xingPanel').style.display = xingOpen ? 'flex' : 'none';
+  if (xingOpen && !document.querySelector('.xmsg')) {
+    addXingMsg('xing', '嗨！我是小星 ⭐\n\n可以问我：\n· 谁在冷却中？\n· 哪些角色今天可用？\n· 当前阵容是什么？\n\n也可以点 📷 发给我游戏截图，我来帮你识别本次出战阵容！');
+  }
+}
+
+function addXingMsg(role, text) {
+  const chat = document.getElementById('xchat');
+  const div = document.createElement('div');
+  div.className = 'xmsg ' + role;
+  div.innerHTML = `<div class="xmsg-av">${role==='xing'?'⭐':'👤'}</div><div class="xmsg-bbl">${escH(text).replace(/\n/g,'<br>')}</div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+function xingSend() {
+  const inp = document.getElementById('xingInput');
+  const q = inp.value.trim();
+  if (!q) return;
+  inp.value = '';
+  addXingMsg('user', q);
+  setTimeout(() => addXingMsg('xing', xingAnswer(q)), 300);
+}
+
+function xingAnswer(q) {
+  const ql = q.toLowerCase();
+  const enabled = RAW_DATA.filter(m => m.enabled !== '否');
+  if (ql.includes('冷却') || ql.includes('谁冷') || ql.includes('cd')) {
+    const cooling = enabled.filter(m => getStatus(m) === '冷却中');
+    if (!cooling.length) return '🎉 目前没有角色在冷却中，所有人都可以出战！';
+    return `⏳ 冷却中（${cooling.length}人）：\n\n` + cooling.map(m => `· ${m.id}（${m.job}）— 至 ${getCDDate(m)}`).join('\n');
+  }
+  if (ql.includes('可用') || ql.includes('能用') || ql.includes('今天')) {
+    const avail = enabled.filter(m => getStatus(m) === '可用');
+    if (!avail.length) return '😅 今天没有可用角色……';
+    const byJob = {};
+    avail.forEach(m => { if (!byJob[m.job]) byJob[m.job] = []; byJob[m.job].push(m.id); });
+    return `✔ 可用（${avail.length}人）：\n\n` + Object.entries(byJob).map(([j,ids]) => `【${j}】${ids.join('、')}`).join('\n');
+  }
+  if (ql.includes('阵容') || ql.includes('本车') || ql.includes('已选') || ql.includes('当前')) {
+    const filled = SLOTS.filter(s => roster[s.id]);
+    if (!filled.length) return '当前车次还没有选入任何角色。';
+    return `⚔ 当前阵容（${filled.length}/11）：\n\n` + filled.map(s => `· ${s.label}：${roster[s.id].id}`).join('\n');
+  }
+  if (ql.includes('统计') || ql.includes('人数') || ql.includes('总共')) {
+    const ok = enabled.filter(m => getStatus(m) === '可用').length;
+    const cd = enabled.filter(m => getStatus(m) === '冷却中').length;
+    return `📊 统计：\n\n✔ 可用：${ok}人\n⏳ 冷却：${cd}人\n🚫 禁用：${RAW_DATA.length - enabled.length}人\n📋 总计：${RAW_DATA.length}人`;
+  }
+  if (ql.includes('帮助') || ql.includes('help') || ql.includes('能做')) {
+    return '我能帮你：\n\n❓ 查询冷却状态\n✔ 查看可用角色\n⚔ 查看当前阵容\n📊 查看人员统计\n📷 截图识别阵容（需配置 API Key）\n\n点击 📷 按钮发截图给我！';
+  }
+  return '我没太懂～ 😅\n\n试试问我：\n· 谁在冷却中？\n· 哪些角色可用？\n· 当前阵容？\n\n或点 📷 发截图给我识别！';
+}
+
+// ── SCREENSHOT RECOGNITION ──
+function handleScreenshot(input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+  if (!xingOpen) { xingOpen = true; document.getElementById('xingPanel').style.display = 'flex'; }
+  const key = localStorage.getItem(LS_XING_KEY);
+  if (!key) {
+    addXingMsg('user', '📷 [截图]');
+    addXingMsg('xing', '📷 收到截图！要用截图识别功能，需要先配置 Anthropic API Key。\n\n点击右上角 ⚙ 设置一下～');
+    openXingSettings();
+    return;
+  }
+  addXingMsg('user', '📷 [截图]');
+  const loadDiv = addXingMsg('xing', '🔍 正在识别截图中的角色，请稍候…');
+  const reader = new FileReader();
+  reader.onload = e => {
+    const base64 = e.target.result.split(',')[1];
+    callClaudeVision(base64, file.type || 'image/png', key, loadDiv);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function callClaudeVision(base64, mediaType, apiKey, loadDiv) {
+  const idList = RAW_DATA.filter(m => m.enabled !== '否').map(m => m.id).join('\n');
+  const model = localStorage.getItem(LS_XING_MODEL) || 'claude-3-5-haiku-20241022';
+  const prompt = `这是一张游戏「星座塔」副本相关的截图。以下是本工会所有已知角色ID（每行一个）：\n${idList}\n\n请仔细查看截图，找出其中出现的玩家游戏昵称/角色ID。只输出你识别到的ID，每行一个，不加任何解释。如截图文字与已知ID高度相似，输出最匹配的已知ID。`;
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-calls': 'true',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+          { type: 'text', text: prompt }
+        ]}]
+      })
+    });
+    if (loadDiv) loadDiv.remove();
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      addXingMsg('xing', `❌ API 调用失败（${resp.status}）：${err.error?.message || '未知错误'}\n\n请检查 API Key 是否正确。`);
+      return;
+    }
+    const data = await resp.json();
+    const text = (data.content?.[0]?.text || '').trim();
+    if (!text) { addXingMsg('xing', '😔 没有识别到任何内容，换一张截图试试？'); return; }
+    const lines = text.split('\n').map(s => s.trim()).filter(Boolean);
+    xingPendingMatch = RAW_DATA.filter(m => lines.some(l => l === m.id || m.id.includes(l) || l.includes(m.id)));
+    if (!xingPendingMatch.length) {
+      addXingMsg('xing', `🔍 识别到文字：${lines.join('、')}\n\n但没有匹配到已知角色，可能角色名在截图中不可见？`);
+      return;
+    }
+    const preview = xingPendingMatch.map(m => `· ${m.job} ${m.id}（操作：${m.operator}）`).join('\n');
+    addXingMsg('xing', `✨ 识别到 ${xingPendingMatch.length} 位角色：\n\n${preview}`);
+    const chat = document.getElementById('xchat');
+    const actDiv = document.createElement('div');
+    actDiv.className = 'xmsg-actions';
+    actDiv.innerHTML = `<button class="xact-btn xact-ok" onclick="confirmXingFill(this.parentElement)">✔ 填入阵容</button><button class="xact-btn xact-no" onclick="this.parentElement.remove()">取消</button>`;
+    chat.appendChild(actDiv);
+    chat.scrollTop = chat.scrollHeight;
+  } catch(err) {
+    if (loadDiv) loadDiv.remove();
+    addXingMsg('xing', `❌ 网络错误：${err.message}`);
+  }
+}
+
+function confirmXingFill(actDiv) {
+  actDiv.remove();
+  let added = 0, skipped = 0;
+  xingPendingMatch.forEach(m => {
+    if (getStatus(m) !== '冷却中' && !slotForMember(m.id)) { addToRoster(m); added++; }
+    else skipped++;
+  });
+  xingPendingMatch = [];
+  let msg = added > 0 ? `✔ 已将 ${added} 位角色填入阵容！` : '没有角色被填入。';
+  if (skipped > 0) msg += `\n（${skipped} 位因冷却或已在阵容中跳过）`;
+  addXingMsg('xing', msg);
+}
+
+// ── XING SETTINGS ──
+function openXingSettings() {
+  document.getElementById('xingSettingsModal').style.display = 'flex';
+  document.getElementById('xingKeyInput').value = localStorage.getItem(LS_XING_KEY) || '';
+  document.getElementById('xingModelInput').value = localStorage.getItem(LS_XING_MODEL) || '';
+}
+function closeXingSettings() {
+  document.getElementById('xingSettingsModal').style.display = 'none';
+}
+function saveXingKey() {
+  const key = document.getElementById('xingKeyInput').value.trim();
+  const model = document.getElementById('xingModelInput').value.trim();
+  key ? localStorage.setItem(LS_XING_KEY, key) : localStorage.removeItem(LS_XING_KEY);
+  model ? localStorage.setItem(LS_XING_MODEL, model) : localStorage.removeItem(LS_XING_MODEL);
+  closeXingSettings();
+  toast(key ? '✔ API Key 已保存' : 'API Key 已清除');
+}
 
 init();
 </script>
