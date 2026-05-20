@@ -560,14 +560,19 @@ const FEISHU_TABLE_RECORDS = 'tbl3jZRW43aYUNrc';
   async function loadCharactersFromFeishu() {
   const res = await fetch(`${API_BASE}/api/characters`);
   if (!res.ok) throw new Error('读取人物库失败');
+
   const rows = await res.json();
+  console.log('飞书人物库返回：', rows);
 
   RAW_DATA = rows.map(r => ({
-    id: r['人物ID'] || '',
-    account: r['归属账号'] || '',
-    job: r['职业'] || '',
-    operator: r['默认操作者'] || '',
-    enabled: r['启用'] || '是'
+    id: r.id || '',
+    account: r.account || '',
+    job: r.job || '',
+    operator: r.operator || '',
+    last_date: '',
+    cd_date: '',
+    status: '可用',
+    enabled: r.enabled || '是'
   }));
 }
 // ── SCHEDULE (开车顺序，来源：星座塔开车顺序.xlsx) ──
