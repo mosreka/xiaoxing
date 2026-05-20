@@ -565,15 +565,17 @@ const FEISHU_TABLE_RECORDS = 'tbl3jZRW43aYUNrc';
   console.log('飞书人物库返回：', rows);
 
   RAW_DATA = rows.map(r => ({
-    id: r.id || '',
-    account: r.account || '',
-    job: r.job || '',
-    operator: r.operator || '',
-    last_date: '',
-    cd_date: '',
-    status: '可用',
-    enabled: r.enabled || '是'
+    id: r.id || r["人物ID"] || "",
+    account: r.account || r["归属账号"] || r["归属"] || "",
+    job: r.job || r["职业"] || "",
+    operator: r.operator || r["默认操作者"] || "",
+    last_date: r.last_date || "",
+    cd_date: r.cd_date || "",
+    status: r.status || "可用",
+    enabled: r.enabled || "是"
   }));
+
+  console.log('转换后的 RAW_DATA：', RAW_DATA);
 }
 // ── SCHEDULE (开车顺序，来源：星座塔开车顺序.xlsx) ──
 const SCHEDULE = {"刺客":[{"account":"time","id":"time"},{"account":"time","id":"time·刺"},{"account":"time","id":"time刺"},{"account":"time","id":"0氪玩家"},{"account":"time","id":"优质零氪玩家"},{"account":"time","id":"致命影啸"},{"account":"time","id":"一刀斩龙哥"},{"account":"time","id":"一刀星座塔"},{"account":"time","id":"1000PT"},{"account":"time","id":"一刀2147M"}],"元素":[{"account":"蚊子","id":"特丽丝"},{"account":"夜蓝","id":"后入更带劲"},{"account":"夜蓝","id":"前后都有电"},{"account":"晨音","id":"幕夜星火"},{"account":"下贱","id":"充电的好新人"},{"account":"木木","id":"希望有古老和守护"},{"account":"time","id":"*time 智"},{"account":"time","id":"time智"},{"account":"time","id":"智time"},{"account":"time","id":"time元素"}],"大法":[{"account":"木木","id":"芸湮"},{"account":"木木","id":"吾心神明"},{"account":"木木","id":"吾言神祇"},{"account":"木木","id":"我有猫"},{"account":"木木","id":"Lueur"},{"account":"木木","id":"鸣蝉夜夜心"},{"account":"木木","id":"嘉荣"},{"account":"木木","id":"树树是木"},{"account":"蚊子","id":"千两花火"},{"account":"蚊子","id":"Talho Yuki"}],"皇家":[{"account":"蚊子","id":"海之星"},{"account":"蚊子","id":"魑影"},{"account":"time","id":"*time 御"},{"account":"time","id":"time御"},{"account":"time","id":"御time"},{"account":"time","id":"time卫士"},{"account":"time","id":"皇time"},{"account":"time","id":"time皇家"},{"account":"time","id":"皇家time"},{"account":"time","id":"time皇"}],"机匠":[{"account":"布丁","id":"ARX-8"},{"account":"布丁","id":"人参苦短"},{"account":"布丁","id":"自走人形"},{"account":"布丁","id":"人形自走"},{"account":"布丁","id":"人形对月兵器"},{"account":"蚊子","id":"蚊子的秘密仓库"},{"account":"time","id":"铁time"},{"account":"time","id":"time铁匠"},{"account":"time","id":"铁匠time"},{"account":"time","id":"time铁"}],"逐影":[{"account":"time","id":"time逐影"},{"account":"time","id":"time竹影"},{"account":"time","id":"竹影time"},{"account":"下贱","id":"红色好新人"},{"account":"下贱","id":"紫色好新人"},{"account":"下贱","id":"黄色好新人"},{"account":"下贱","id":"白色好新人"},{"account":"下贱","id":"绿色好新人"},{"account":"下贱","id":"蓝色好新人"},{"account":"下贱","id":"RO的好新人"}],"主教（队长）":[{"account":"蚊子","id":"月夜猫~"},{"account":"蚊子","id":"anemona"},{"account":"下贱","id":"事情太多"},{"account":"下贱","id":"助力的好新人"},{"account":"下贱","id":"祝福的好新人"},{"account":"time","id":"*time 牧"},{"account":"布丁","id":"Ferris"},{"account":"夜蓝","id":"夜蓝忆一"},{"account":"兔子","id":"兔姬丝"},{"account":"白露","id":"黑心圣手"}],"主教（辅助）":[{"account":"晨音","id":"星空下的夜"},{"account":"晨音","id":"星空下的雨"},{"account":"晨音","id":"星空下的风"},{"account":"晨音","id":"星空下的雪"},{"account":"晨音","id":"呓嘻嘻"},{"account":"晨音","id":"冷月月"},{"account":"晨音","id":"香味果酱咖啡"},{"account":"晨音","id":"月影子"},{"account":"木木","id":"及酒"},{"account":"木木","id":"白苏"}],"诗人":[{"account":"晨音","id":"克拉夫特"},{"account":"白露","id":"烟嗓嚎Numb"},{"account":"蚊子","id":"汉宫秋月"},{"account":"夜蓝","id":"我谈个情你浪什么"},{"account":"木木","id":"细辛属杜衡"},{"account":"time","id":"*time 诗"},{"account":"time","id":"time宫廷"},{"account":"time","id":"time诗人"},{"account":"time","id":"诗time"},{"account":"time","id":"诗人time"}],"契灵士":[{"account":"晨音","id":"风吹着游子飘啊飘"},{"account":"晨音","id":"秋雨落绵绵"},{"account":"晨音","id":"晚霞缓缓"},{"account":"晨音","id":"素心若雪"},{"account":"晨音","id":"花花世界迷人眼"},{"account":"晨音","id":"灵月幻花香"},{"account":"time","id":"777000444"},{"account":"夜蓝","id":"我会变你信吗"},{"account":"木木","id":"希望有星月与翅膀"},{"account":"下贱","id":"仁赭神归"}],"猫":[{"account":"木木","id":"西森"},{"account":"木木","id":"衔蝉奴"},{"account":"木木","id":"西森"},{"account":"木木","id":"蓝双"},{"account":"木木","id":"棕虎斑加白森林猫"},{"account":"time","id":"啊喵啊"},{"account":"蚊子","id":"衔蝉奴"},{"account":"布丁","id":"自走对月兵器"},{"account":"布丁","id":"自走對月兵器"},{"account":"白露","id":"泡芙小喵"}]};
