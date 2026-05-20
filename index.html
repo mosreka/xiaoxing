@@ -558,7 +558,7 @@ const FEISHU_APP_TOKEN = 'KeaibUihOapTSUsTv4UcEAsdnIh';
 const FEISHU_TABLE_CHARACTERS = 'tbl5Jg10Uha7fIcq';
 const FEISHU_TABLE_RECORDS = 'tbl3jZRW43aYUNrc';
   async function loadCharactersFromFeishu() {
-  const res = await fetch(`${API_BASE}/characters`);
+  const res = await fetch(`${API_BASE}/api/characters`);
   if (!res.ok) throw new Error('读取人物库失败');
   const rows = await res.json();
 
@@ -901,54 +901,72 @@ async function confirmRecord() {
   if (filled.length === 0) { toast('还没有选入任何人物'); return; }
   if (!confirm(`确认记录本次出战的 ${filled.length} 位人物，并写入飞书？`)) return;
 
+  const writeToken = localStorage.getItem('raid_write_token') || prompt('请输入写入口令');
+  if (!writeToken) {
+    toast('已取消：未输入写入口令');
+    return;
+  }
+  localStorage.setItem('raid_write_token', writeToken);
+
   const date = document.getElementById('tDate').value;
   const car = document.getElementById('tCar').value;
   const cd = parseInt(document.getElementById('tCD').value) || 3;
   const cdDate = addDays(date, cd);
 
-  const records = filled.map(s => {
+  const recordsForWorker = filled.map(s => {
     const m = roster[s.id];
     return {
-      '日期': date,
-      '车次': car,
-      '职位': s.label,
-      '人物ID': m.id,
-      '归属账号': m.account,
-      '职业': m.job,
-      '操作者': m.operator || m.account,
-      '冷却到期': cdDate,
-      '记录时间': new Date().toLocaleString()
+      id: m.id,
+      job: m.job,
+      operator: m.operator || m.account
     };
   });
 
   try {
-    const res = await fetch(`${API_BASE}/records`, {
+    const res = await fetch(`${API_BASE}/api/save-roster`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ records })
+      body: JSON.stringify({
+        date,
+        car,
+        roster: recordsForWorker,
+        writeToken
+      })
     });
 
-    if (!res.ok) throw new Error('写入飞书失败');
+    const result = await res.json();
+
+    if (!res.ok || !result.ok) {
+      if (result.error === '口令错误') {
+        localStorage.removeItem('raid_write_token');
+      }
+      throw new Error(result.error || '写入飞书失败');
+    }
 
     filled.forEach(s => {
       const m = roster[s.id];
-      cdOverrides[m.id] = { last_date: date, cd_date: cdDate };
+      cdOverrides[m.id] = {
+        last_date: date,
+        cd_date: cdDate
+      };
     });
 
     saveHistory(date, filled);
     saveLS();
+
     await loadCharactersFromFeishu();
-    renderHomeHist()
+    renderHomeHist();
     renderPool();
     renderRoster();
-    toast('✔ 已写入飞书挑战记录');
+
+    toast(`✔ 已写入飞书，新增 ${result.added || 0} 条，跳过重复 ${result.skipped || 0} 条`);
   } catch (e) {
     console.error(e);
-    toast('⚠ 写入飞书失败，请检查 Worker');
+    toast(`⚠ ${e.message}`);
   }
 }
 
-function addDays(dateStr, days) {
+  function addDays(dateStr, days) {
   const d = new Date(dateStr);
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0,10);
