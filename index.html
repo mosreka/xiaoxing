@@ -426,7 +426,9 @@ body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t
     </div>
     <div class="roster-grid" id="rosterGrid"></div>
     <div class="roster-actions">
-      <button class="btn btn-confirm" onclick="confirmRecord()">✦ 确认记录并更新</button>
+      <!-- 【修改】写入飞书已由 AnythingLLM + OCR API 完成
+     前端看板不再负责写入，只负责刷新展示最新飞书数据 -->
+      <button class="btn btn-confirm" onclick="refreshPool()">↺ 刷新飞书数据</button>
       <button class="btn btn-wechat" onclick="genWechat()">📋 生成微信群文本</button>
       <button class="btn btn-copy" onclick="copyText()">⎘ 复制文本</button>
       <button class="btn btn-copy" onclick="clearWechat()">✕ 清除文本</button>
@@ -553,6 +555,14 @@ body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t
 // ── DATA ──
 let RAW_DATA = [];
 let RAID_RECORDS = [];
+
+// 【新增】自动刷新计时器
+// 用于控制前端看板定时从飞书 Worker 读取最新人物库和挑战记录
+let autoRefreshTimer = null;
+
+// 【新增】自动刷新间隔
+// 180 * 1000 = 180秒 = 3分钟
+const AUTO_REFRESH_INTERVAL = 180 * 1000;
   
 const API_BASE = 'https://feishu-raidhelper.mosreka.workers.dev';
 const FEISHU_APP_TOKEN = 'KeaibUihOapTSUsTv4UcEAsdnIh';
@@ -565,7 +575,7 @@ const FEISHU_TABLE_RECORDS = 'tbl3jZRW43aYUNrc';
   const rows = await res.json();
   console.log('飞书人物库返回：', rows);
 
-  RAW_DATA = rows.map(r => ({
+  RAW_DATA = rows.map((r, idx) => ({
     id: r.id || r["人物ID"] || "",
     account: r.account || r["归属账号"] || r["归属"] || "",
     job: r.job || r["职业"] || "",
@@ -574,6 +584,7 @@ const FEISHU_TABLE_RECORDS = 'tbl3jZRW43aYUNrc';
     cd_date: r.cd_date || "",
     status: r.status || "可用",
     enabled: r.enabled || "是"
+    _order: idx,
   }));
 
   console.log('转换后的 RAW_DATA：', RAW_DATA);
@@ -675,7 +686,7 @@ function getScheduleInfo(displayJob, memberId) {
 
 // 11 fixed slots
 const SLOTS = [
-  {id:'s8',  job:'主教',   label:'主教（队长）', icon:'✙', prefOp:'白露'},
+  {id:'s8',  job:'主教（队长）',   label:'主教（队长）', icon:'✙'},
   {id:'s1',  job:'刺客',   label:'刺客',        icon:'◆'},
   {id:'s2',  job:'元素',   label:'元素',        icon:'✦'},
   {id:'s3',  job:'机匠',   label:'机匠',        icon:'⚙'},
@@ -683,7 +694,7 @@ const SLOTS = [
   {id:'s5',  job:'皇家',   label:'皇家',        icon:'♛'},
   {id:'s6',  job:'诗人',   label:'诗人',        icon:'♪'},
   {id:'s7',  job:'契灵士', label:'契灵士',      icon:'✚'},
-  {id:'s9',  job:'主教',   label:'主教（辅助）', icon:'✙', prefOp:'晨音'},
+  {id:'s9',  job:'主教（辅助）',   label:'主教（辅助）', icon:'✙'},
   {id:'s10', job:'猫',     label:'猫',          icon:'⁂'},
   {id:'s11', job:'逐影',   label:'逐影',        icon:'◈'},
 ];
@@ -697,14 +708,53 @@ const JOB_COLOR = {
 
 // ── DISPLAY JOB (bishop sub-role) ──
 function getDisplayJob(m) {
-  if (m.job === '主教') {
-    if (m.operator === '白露') return '主教（队长）';
-    if (m.operator === '晨音') return '主教（辅助）';
-    return '主教';
-  }
   return m.job;
 }
 
+// 【新增】职业显示顺序
+const ROSTER_JOB_ORDER = [
+  '刺客',
+  '元素',
+  '大法',
+  '皇家',
+  '机匠',
+  '逐影',
+  '主教（队长）',
+  '主教（辅助）',
+  '诗人',
+  '契灵士',
+  '猫'
+];
+
+// 【新增】名单视图/排班视图统一使用的人物排序
+function sortMembersForRosterView(list) {
+  return [...list].sort((a, b) => {
+    const ja = getDisplayJob(a);
+    const jb = getDisplayJob(b);
+
+    const ia = ROSTER_JOB_ORDER.indexOf(ja);
+    const ib = ROSTER_JOB_ORDER.indexOf(jb);
+
+    const oa = ia === -1 ? 999 : ia;
+    const ob = ib === -1 ? 999 : ib;
+
+    if (oa !== ob) return oa - ob;
+
+    // 同职业内部按飞书人物库读取顺序排序
+    // loadCharactersFromFeishu() 保持 rows.map，不打乱顺序，所以这里用 _order
+    return (a._order ?? 9999) - (b._order ?? 9999);
+  });
+}
+
+// 【新增】按职业获取名单视图顺序下的人物
+function getMembersByDisplayJob(displayJob) {
+  return sortMembersForRosterView(
+    RAW_DATA.filter(m =>
+      m.enabled !== '否' &&
+      getDisplayJob(m) === displayJob
+    )
+  );
+}
 // ── STATE ──
 let roster = {};            // {slotId: member}
 let cdOverrides = {};       // {memberId: {cd_date, last_date}} from localStorage
@@ -723,19 +773,22 @@ async function init() {
   loadLS();
 
   try {
-  await loadCharactersFromFeishu();
-  await loadRecordsFromFeishu();
-  mergeRecordStatusToCharacters();
+  // 【修改】打开网页时立即刷新一次飞书数据
+  // 包括：人物库 + 挑战记录 + 冷却状态计算
+  await refreshDashboardData(true);
+
   toast('✔ 已从飞书读取人物库和挑战记录');
 } catch (e) {
   console.error(e);
   toast('⚠ 飞书数据读取失败');
 }
-  
-  buildJobFilter();
-  renderRoster();
-  renderPool();
-  updateNavBtns();
+
+// 【保留】初始化车次切换按钮状态
+updateNavBtns();
+
+// 【新增】打开网页后启动自动刷新
+// 之后每180秒刷新一次
+startAutoRefresh();
 }
 function loadRosterForCar(idx) {
   let cars = {};
@@ -777,15 +830,16 @@ function slotForMember(memberId) {
   return Object.keys(roster).find(k => roster[k] && roster[k].id === memberId);
 }
 function addToRoster(member) {
-  let emptySlot;
-  if (member.job === '主教') {
-    // prefer the slot whose prefOp matches this member's operator
-    const pref = SLOTS.find(s => s.job === '主教' && s.prefOp === member.operator && !roster[s.id]);
-    emptySlot = pref || SLOTS.find(s => s.job === '主教' && !roster[s.id]);
-  } else {
-    emptySlot = SLOTS.find(s => s.job === member.job && !roster[s.id]);
+  // 【修改】飞书人物库已经直接区分：
+  // 主教（队长） / 主教（辅助）
+  // 所以不再根据 operator 判断主教槽位
+  const emptySlot = SLOTS.find(s => s.job === member.job && !roster[s.id]);
+
+  if (!emptySlot) {
+    toast('没有空余的 ' + member.job + ' 职位槽');
+    return;
   }
-  if (!emptySlot) { toast('没有空余的 ' + member.job + ' 职位槽'); return; }
+
   roster[emptySlot.id] = member;
   saveLS();
   renderRoster();
@@ -833,9 +887,27 @@ function renderRoster() {
 
 // ── RENDER POOL ──
 function buildJobFilter() {
+  // 【修改】每次刷新职业筛选器前，先保留当前选择
+  // 避免自动刷新后用户当前筛选条件被重置
   const jobs = [...new Set(RAW_DATA.map(m => getDisplayJob(m)).filter(Boolean))].sort();
   const sel = document.getElementById('fJob');
-  jobs.forEach(j => { const o = document.createElement('option'); o.value = j; o.textContent = j; sel.appendChild(o); });
+
+  const oldVal = sel.value;
+
+  // 【修改】清空旧 option，避免每次刷新重复追加职业
+  sel.innerHTML = '<option value="">全部职业</option>';
+
+  jobs.forEach(j => {
+    const o = document.createElement('option');
+    o.value = j;
+    o.textContent = j;
+    sel.appendChild(o);
+  });
+
+  // 【修改】如果刷新后原筛选项仍然存在，则恢复原选择
+  if ([...sel.options].some(o => o.value === oldVal)) {
+    sel.value = oldVal;
+  }
 }
 
 function renderPool() {
@@ -1145,23 +1217,80 @@ function clearWechat() {
   document.getElementById('wechatText').textContent = '点击「生成微信群文本」后显示…';
 }
 
-// ── REFRESH ──
-async function refreshPool() {
+async function refreshDashboardData(silent = false) {
+  // 【新增】统一刷新入口
+  // 用于：
+  // 1. 打开网页时立即刷新
+  // 2. 点击“刷新数据”按钮时刷新
+  // 3. 每180秒自动刷新
+
   try {
+    // 【新增】读取飞书人物库
     await loadCharactersFromFeishu();
+
+    // 【新增】读取飞书挑战记录
     await loadRecordsFromFeishu();
+
+    // 【新增】根据挑战记录计算：
+    // 最近参与、冷却到期、当前状态
     mergeRecordStatusToCharacters();
 
+    // 【新增】刷新职业筛选器
     buildJobFilter();
+
+    // 【新增】刷新车次阵容区
+    renderRoster();
+
+    // 【新增】刷新左侧人物池
     renderPool();
+
+    // 【新增】如果当前在人物库页面，则刷新人物库当前视图
     renderRosterCurrent?.();
 
-    toast('↺ 已从飞书刷新人物库和挑战记录');
+    // 【新增】如果首页历史记录函数存在，则刷新首页历史记录
+    renderHomeHist?.();
+
+    // 【新增】如果统计函数存在，则刷新统计
+    updateStats?.();
+
+    if (!silent) {
+      toast('↺ 已刷新飞书数据');
+    }
+
   } catch (e) {
     console.error(e);
-    toast('⚠ 刷新飞书数据失败');
+
+    if (!silent) {
+      toast('⚠ 刷新飞书数据失败');
+    }
   }
 }
+
+function startAutoRefresh() {
+  // 【新增】启动自动刷新前，先清掉旧计时器
+  // 避免重复 setInterval 导致多次请求
+  stopAutoRefresh();
+
+  // 【新增】每180秒自动刷新一次
+  autoRefreshTimer = setInterval(() => {
+    refreshDashboardData(true);
+  }, AUTO_REFRESH_INTERVAL);
+}
+
+function stopAutoRefresh() {
+  // 【新增】停止自动刷新
+  if (autoRefreshTimer) {
+    clearInterval(autoRefreshTimer);
+    autoRefreshTimer = null;
+  }
+}
+
+// ── REFRESH ──
+async function refreshPool() {
+  // 【修改】手动点击“刷新数据”按钮时，也走统一刷新逻辑
+  await refreshDashboardData(false);
+}
+
 // ── TOAST ──
 function toast(msg) {
   const el = document.getElementById('toast');
@@ -1179,14 +1308,25 @@ document.getElementById('tDate').addEventListener('change', () => {
   renderRoster();
   renderRosterCurrent?.();
 });
-
+document.addEventListener('visibilitychange', () => {
+  // 【新增】浏览器标签页切到后台时暂停自动刷新
+  // 避免多人长时间挂后台造成无效请求
+  if (document.hidden) {
+    stopAutoRefresh();
+  } else {
+    // 【新增】页面重新回到前台时，先立即刷新一次
+    // 然后重新开始180秒自动刷新
+    refreshDashboardData(true);
+    startAutoRefresh();
+  }
+});
 // ── VIEW SWITCHING ──
 function showView(v) {
   document.getElementById('viewHome').classList.toggle('active', v === 'home');
   document.getElementById('viewTeam').classList.toggle('active', v === 'team');
   document.getElementById('viewRoster').classList.toggle('active', v === 'roster');
   if (v === 'home') renderHomeHist();
-  if (v === 'roster') { renderRosterSched(); runDataCheck(); }
+  if (v === 'roster') { renderRosterCurrent(); }
 }
 function openRoster() { showView('roster'); }
 
@@ -1205,49 +1345,190 @@ function renderRosterCurrent() {
   else renderRosterList();
 }
 function renderRosterSched() {
-  const curIdx = document.getElementById('rCar').value !== '' ? parseInt(document.getElementById('rCar').value) : -1;
+  // 【修改】排班视图不再使用写死的 SCHEDULE_ROWS 人员顺序
+  // 而是按名单视图中每个职业的人物ID顺序自动填入第1~第10车
+  const curIdx = document.getElementById('rCar').value !== ''
+    ? parseInt(document.getElementById('rCar').value)
+    : -1;
+
   const q = (document.getElementById('rSearch').value || '').toLowerCase();
-  const CAR = ['第1车','第2车','第3车','第4车','第5车','第6车','第7车','第8车','第9车','第10车'];
-  // build status map from RAW_DATA
-  const stMap = {};
-  RAW_DATA.forEach(m => { stMap[m.id] = getStatus(m); });
-  // header
+
+  const CAR = [
+    '第1车','第2车','第3车','第4车','第5车',
+    '第6车','第7车','第8车','第9车','第10车'
+  ];
+
+  const JC = {
+    '刺客':'#f85149',
+    '元素':'#39d0d0',
+    '大法':'#79c0ff',
+    '皇家':'#e3b341',
+    '机匠':'#f0883e',
+    '逐影':'#d2a8ff',
+    '主教（队长）':'#3fb950',
+    '主教（辅助）':'#26c299',
+    '诗人':'#ff9ac1',
+    '契灵士':'#58b8c8',
+    '猫':'#ffb3cc'
+  };
+
+  const ICON = {
+    '刺客':'◆',
+    '元素':'✦',
+    '大法':'✧',
+    '皇家':'♛',
+    '机匠':'⚙',
+    '逐影':'◈',
+    '主教（队长）':'✙',
+    '主教（辅助）':'✙',
+    '诗人':'♪',
+    '契灵士':'✚',
+    '猫':'⁂'
+  };
+
+  const DRIVER = {
+    '刺客':'time',
+    '元素':'布丁',
+    '大法':'木木',
+    '皇家':'蚊子',
+    '机匠':'夜蓝',
+    '逐影':'下贱',
+    '主教（队长）':'白露',
+    '主教（辅助）':'晨音',
+    '诗人':'夜蓝',
+    '契灵士':'木木',
+    '猫':'蚊子'
+  };
+
   let h = '<thead><tr><th class="rv-job-col">职业 · 驾驶员</th>';
-  for (let i = 0; i < 10; i++) h += `<th${i===curIdx?' class="rv-cur-col"':''}>${i===curIdx?'★ ':''}${CAR[i]}</th>`;
+
+  for (let i = 0; i < 10; i++) {
+    h += `<th${i === curIdx ? ' class="rv-cur-col"' : ''}>${i === curIdx ? '★ ' : ''}${CAR[i]}</th>`;
+  }
+
   h += '</tr></thead>';
-  // body
+
   let b = '<tbody>';
-  const JC = {'刺客':'#f85149','元素':'#39d0d0','大法':'#79c0ff','皇家':'#e3b341','机匠':'#f0883e','逐影':'#d2a8ff','主教（队长）':'#3fb950','主教（辅助）':'#26c299','诗人':'#ff9ac1','契灵士':'#58b8c8','猫':'#ffb3cc'};
-  SCHEDULE_ROWS.forEach(row => {
-    if (q) { const any = row.cars.some(c => c.id.toLowerCase().includes(q) || c.a.toLowerCase().includes(q)); if (!any) return; }
-    const col = JC[row.job] || '#8b949e';
+
+  ROSTER_JOB_ORDER.forEach(job => {
+    const members = getMembersByDisplayJob(job);
+
+    // 【修改】搜索逻辑：搜索人物ID、账号、操作者、职业
+    if (q) {
+      const any = members.some(m =>
+        [m.id, m.account, m.operator, getDisplayJob(m)]
+          .some(v => String(v || '').toLowerCase().includes(q))
+      );
+
+      if (!any) return;
+    }
+
+    const col = JC[job] || '#8b949e';
+
     b += '<tr>';
-    b += `<td class="rv-job-td"><span class="rv-job-lbl" style="background:${col}22;color:${col}">${row.icon} ${escH(row.job)}</span><br><span style="font-size:10px;color:var(--text3);padding-left:4px">驾驶员：${escH(row.driver)}</span></td>`;
-    row.cars.forEach((car, i) => {
-      const st = stMap[car.id] || '未知';
-      const dotCls = st==='可用'?'rv-dot-ok':st==='冷却中'?'rv-dot-cd':'rv-dot-abs';
-      const nmCls  = st==='冷却中'?' rv-cd':'';
-      const hl = q && (car.id.toLowerCase().includes(q)||car.a.toLowerCase().includes(q));
-      const tdCls = i===curIdx?' rv-cur-td':'';
-      const nmStyle = hl?' style="background:#1f2d00;border-radius:3px;padding:1px 3px"':'';
-      b += `<td class="${tdCls}"><div class="rv-char-cell"><div class="rv-char-row"><span class="rv-dot ${dotCls}"></span><span class="rv-char-name${nmCls}"${nmStyle}>${escH(car.id)}</span></div><span class="rv-char-acct">${escH(car.a)}</span></div></td>`;
-    });
+
+    b += `
+      <td class="rv-job-td">
+        <span class="rv-job-lbl" style="background:${col}22;color:${col}">
+          ${ICON[job] || '★'} ${escH(job)}
+        </span>
+        <br>
+        <span style="font-size:10px;color:var(--text3);padding-left:4px">
+          驾驶员：${escH(DRIVER[job] || '')}
+        </span>
+      </td>
+    `;
+
+    for (let i = 0; i < 10; i++) {
+      const m = members[i];
+
+      const tdCls = i === curIdx ? ' rv-cur-td' : '';
+
+      if (!m) {
+        b += `<td class="${tdCls}"><span style="color:var(--text3);font-size:11px">—</span></td>`;
+        continue;
+      }
+
+      const st = getStatus(m);
+      const dotCls = st === '可用'
+        ? 'rv-dot-ok'
+        : st === '冷却中'
+          ? 'rv-dot-cd'
+          : 'rv-dot-abs';
+
+      const nmCls = st === '冷却中' ? ' rv-cd' : '';
+
+      const hl = q && [m.id, m.account, m.operator, getDisplayJob(m)]
+        .some(v => String(v || '').toLowerCase().includes(q));
+
+      const nmStyle = hl
+        ? ' style="background:#1f2d00;border-radius:3px;padding:1px 3px"'
+        : '';
+
+      b += `
+        <td class="${tdCls}">
+          <div class="rv-char-cell">
+            <div class="rv-char-row">
+              <span class="rv-dot ${dotCls}"></span>
+              <span class="rv-char-name${nmCls}"${nmStyle}>${escH(m.id)}</span>
+            </div>
+            <span class="rv-char-acct">${escH(m.account)}</span>
+          </div>
+        </td>
+      `;
+    }
+
     b += '</tr>';
   });
+
   b += '</tbody>';
+
   document.getElementById('rSchedTable').innerHTML = h + b;
 }
 function renderRosterList() {
+  // 【修改】名单视图直接读取 RAW_DATA
+  // RAW_DATA 来源于 /api/characters，即飞书人物库
+  // 最近参与、冷却到期、状态仍由 mergeRecordStatusToCharacters() 计算
   const q = (document.getElementById('rSearch').value || '').toLowerCase();
   const tb = document.getElementById('rListTbody');
-  const SC = {可用:'<span style="background:#0d2116;color:#3fb950;border:1px solid #1a4428;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">✔ 可用</span>',冷却中:'<span style="background:#2d2000;color:#e3b341;border:1px solid #5a4000;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">⏳ 冷却中</span>',缺席:'<span style="background:#2d1b1b;color:#f85149;border:1px solid #5a1e1e;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">❌ 缺席</span>'};
-  tb.innerHTML = ''; let n = 0;
-  RAW_DATA.forEach(m => {
-    if (q && ![m.id,m.account,m.operator,m.job].some(v=>v.toLowerCase().includes(q))) return;
-    n++;
-    tb.innerHTML += `<tr><td style="color:var(--text3);font-size:11px">${n}</td><td style="font-family:Consolas,monospace;color:#e8f0ff">${escH(m.id)}</td><td><span style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:1px 7px;font-size:11px;color:#79c0ff">${escH(m.account)}</span></td><td style="color:var(--text2);font-size:12px">${escH(m.job)}</td><td><span style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:1px 7px;font-size:11px;color:#79c0ff">${escH(m.operator)}</span></td><td style="color:var(--text2);font-size:11px">${m.last_date||'—'}</td><td style="color:var(--text2);font-size:11px">${m.cd_date||'—'}</td><td>${SC[m.status]||`<span style="color:var(--text3)">${escH(m.status)}</span>`}</td><td style="color:${m.enabled==='是'?'var(--green)':'var(--red)'};font-weight:600;font-size:12px">${escH(m.enabled)}</td></tr>`;
+
+  const SC = {
+    可用:'<span style="background:#0d2116;color:#3fb950;border:1px solid #1a4428;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">✔ 可用</span>',
+    冷却中:'<span style="background:#2d2000;color:#e3b341;border:1px solid #5a4000;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">⏳ 冷却中</span>',
+    缺席:'<span style="background:#2d1b1b;color:#f85149;border:1px solid #5a1e1e;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">❌ 缺席</span>'
+  };
+
+  tb.innerHTML = '';
+
+  // 【修改】先按职业顺序，再按飞书人物库中的人物ID顺序排列
+  const list = sortMembersForRosterView(RAW_DATA).filter(m => {
+    if (!q) return true;
+
+    return [m.id, m.account, m.operator, m.job, getDisplayJob(m)]
+      .some(v => String(v || '').toLowerCase().includes(q));
   });
-  document.getElementById('rListEmpty').style.display = n===0?'block':'none';
+
+  list.forEach((m, idx) => {
+    const status = getStatus(m);
+    const lastDate = getLastDate(m);
+    const cdDate = getCDDate(m);
+
+    tb.innerHTML += `
+      <tr>
+        <td style="color:var(--text3);font-size:11px">${idx + 1}</td>
+        <td style="font-family:Consolas,monospace;color:#e8f0ff">${escH(m.id)}</td>
+        <td><span style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:1px 7px;font-size:11px;color:#79c0ff">${escH(m.account)}</span></td>
+        <td style="color:var(--text2);font-size:12px">${escH(getDisplayJob(m))}</td>
+        <td><span style="background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:1px 7px;font-size:11px;color:#79c0ff">${escH(m.operator)}</span></td>
+        <td style="color:var(--text2);font-size:11px">${lastDate || '—'}</td>
+        <td style="color:var(--text2);font-size:11px">${cdDate || '—'}</td>
+        <td>${SC[status] || `<span style="color:var(--text3)">${escH(status)}</span>`}</td>
+        <td style="color:${m.enabled === '是' ? 'var(--green)' : 'var(--red)'};font-weight:600;font-size:12px">${escH(m.enabled)}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('rListEmpty').style.display = list.length === 0 ? 'block' : 'none';
 }
 
 // ── DATA CONSISTENCY CHECK ──
