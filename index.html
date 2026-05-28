@@ -584,7 +584,9 @@ const FEISHU_TABLE_RECORDS = 'tbl3jZRW43aYUNrc';
     cd_date: r.cd_date || "",
     status: r.status || "可用",
     enabled: r.enabled || "是",
-    _order: idx
+    // 【新增】优先使用飞书人物库“排序”字段
+    // 如果没有排序字段，则退回 API 返回顺序
+    _order: Number(r.order || r["排序"] || idx)
   }));
 
   console.log('转换后的 RAW_DATA：', RAW_DATA);
