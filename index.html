@@ -589,11 +589,44 @@ const FEISHU_TABLE_RECORDS = 'tbl3jZRW43aYUNrc';
 
   console.log('转换后的 RAW_DATA：', RAW_DATA);
 }
+  // 【新增】把飞书日期字段统一转换成 YYYY-MM-DD
+  // 解决飞书日期时间戳因时区导致前端显示少一天的问题
+function formatFeishuDateValue(value) {
+  if (!value) return "";
+
+  // 如果 Worker 已经返回字符串，例如 "2026-05-27" 或 "2026/05/27"
+  if (typeof value === "string") {
+    return value.replace(/\//g, "-").slice(0, 10);
+  }
+
+  // 飞书日期字段通常是毫秒时间戳
+  // 用 +08:00 显示，避免 UTC/本地时区把日期减一天
+  const d = new Date(Number(value) + 8 * 60 * 60 * 1000);
+
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+
+  return `${y}-${m}-${day}`;
+}
   async function loadRecordsFromFeishu() {
   const res = await fetch(`${API_BASE}/api/records`);
   if (!res.ok) throw new Error('读取挑战记录失败');
 
-  RAID_RECORDS = await res.json();
+  const rows = await res.json();
+
+  RAID_RECORDS = rows.map(item => {
+    const f = item.fields || item;
+
+    return {
+      id: f["人物ID"] || f["人物id"] || f.id || "",
+      last_date: formatFeishuDateValue(f["日期"] || f.date || f.last_date),
+      car: f["车次"] || f.car || "",
+      job: f["职业"] || f.job || "",
+      operator: f["驾驶员"] || f.operator || "",
+      record_time: f["记录时间"] || f.record_time || ""
+    };
+  });
 }
 
 function getLatestRecordDate(memberId) {
